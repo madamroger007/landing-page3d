@@ -13,10 +13,11 @@ import {
   ShoppingCart,
   Play,
 } from "lucide-react";
-import { useProductContext } from "../../store/context/ProductContext";
+import { useCartContext } from "../../store/context/cart/CartContext";
 import CustomCursor from "../../components/CustomCursor";
 import { getYouTubeEmbedUrl } from "../../utils/utils";
 import ModalVoucher from "../../components/ModalVoucher";
+import { sendLinkEmailPayment } from "@/src/server/actions/payment/action";
 
 const fee: number = parseFloat(process.env.NEXT_PUBLIC_FEE || "0");
 export default function CheckoutPage() {
@@ -28,7 +29,7 @@ export default function CheckoutPage() {
     addToCart,
     checkout,
     checkoutStatus,
-  } = useProductContext();
+  } = useCartContext();
 
   const [customerInfo, setCustomerInfo] = React.useState({
     name: "",
@@ -64,24 +65,15 @@ export default function CheckoutPage() {
 
   const handleCheckout = async () => {
     if (!isFormValid) return;
-    const result = await checkout({
+
+    const payload = {
       name: customerInfo.name,
       email: customerInfo.email,
       phone: customerInfo.phone
-    });
+    };
+    const result = await checkout(payload);
 
     if (result) {
-      // Redirect to the persistent payment page
-      await fetch('/api/email/payment-link', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: customerInfo.email,
-          name: customerInfo.name,
-          phone: customerInfo.phone,
-          order_id: result.order_id
-        }),
-      })
       window.location.href = `/checkout/payment/${result.order_id}`;
 
     }

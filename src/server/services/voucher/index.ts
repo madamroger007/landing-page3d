@@ -1,9 +1,9 @@
-import { voucherRepository } from "../../repositories/voucher";
+import { cachedVoucherRepository } from "../../repositories/voucher/cached";
 import { SelectVoucher } from "../../db/schema/voucher";
 import { VoucherSchema } from "../../validations/voucher";
 
 export async function getVouchersService() {
-    const vouchers = await voucherRepository.getVouchers();
+    const vouchers = await cachedVoucherRepository.getVouchers();
     return vouchers;
 }
 
@@ -14,28 +14,28 @@ export async function createVoucherService(data: VoucherSchema) {
         createdAt: now,
         updatedAt: now,
     };
-    const voucher = await voucherRepository.createVoucher(voucherData);
+    const voucher = await cachedVoucherRepository.createVoucher(voucherData);
     return voucher;
 }
 
 export async function updateVoucherService(data: SelectVoucher) {
-    const idVoucher = await voucherRepository.getVoucherById(data.id)
+    const idVoucher = await cachedVoucherRepository.getVoucherById(data.id)
     if (idVoucher) {
-        await voucherRepository.updateVoucher(data)
+        await cachedVoucherRepository.updateVoucher(data)
 
     }
 }
 
 export async function getVoucherByIdService(id: number) {
-    const voucher = await voucherRepository.getVoucherById(id);
+    const voucher = await cachedVoucherRepository.getVoucherById(id);
     return voucher;
 }
 
 
 export async function deleteVoucherService(id: number) {
-    const idVoucher = await voucherRepository.getVoucherById(id)
+    const idVoucher = await cachedVoucherRepository.getVoucherById(id)
     if (idVoucher) {
-        await voucherRepository.deleteVoucher(idVoucher.id)
+        await cachedVoucherRepository.deleteVoucher(idVoucher.id)
     }
 
 }

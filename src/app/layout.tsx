@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Syne, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import ProductsProviders from "../store/providers/ProductsProviders";
-import DashboardLayoutComponent from "../components/dashboard/LayoutComponent";
+import { CartProvider } from "../store/context/cart/CartContext";
 
 const syne = Syne({
   variable: "--font-syne",
@@ -29,9 +29,9 @@ export default function RootLayout({
       <body
         className={`${syne.variable} ${spaceGrotesk.variable} antialiased selection:bg-neon-blue selection:text-white cursor-hidden`}
       >
-        <DashboardLayoutComponent>
+        <CartProvider>
           <ProductsProviders>{children}</ProductsProviders>
-        </DashboardLayoutComponent>
+        </CartProvider>
       </body>
     </html>
   );

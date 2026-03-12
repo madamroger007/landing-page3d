@@ -3,11 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FecthDataVoucher } from '@/src/utils/FetchData';
 import { Voucher, VoucherFormData, VoucherFormError, UseVouchersReturn } from './types';
-import {
-    createVoucher,
-    updateVoucher,
-    deleteVoucher as deleteVoucherAction,
-} from '@/src/server/actions/dashboard';
+import { createVoucher, updateVoucher, deleteVoucher as deleteVoucherAction } from '@/src/server/actions/vouchers/action';
 
 export function useVouchers(): UseVouchersReturn {
     const [vouchers, setVouchers] = useState<Voucher[]>([]);

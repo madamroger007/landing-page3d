@@ -1,27 +1,27 @@
 export type Orders = {
-    createdAt: string,
-    items: Item[],
-    order_id: string,
-    status: string,
-    gross_amount: number,
-    snap_token: string,
-    customer: Customer,
-    payment_method: string,
-    va_number: string
+  createdAt: string,
+  items: Item[],
+  order_id: string,
+  status: string,
+  gross_amount: number,
+  snap_token: string,
+  customer: Customer,
+  payment_method: string,
+  va_number: string
 }
 
 export type Customer = {
-    name: string,
-    email: string,
-    phone: string
+  name: string,
+  email: string,
+  phone: string
 }
 export type Item = {
-    id: string,
-    name: string,
-    image?: string,
-    videoUrl?: string,
-    price: number,
-    quantity: number
+  id: number,
+  name: string,
+  image?: string,
+  videoUrl?: string,
+  price: number,
+  quantity: number
 }
 
 // ─── Product ─────────────────────────────────────────────────────────────────
@@ -33,19 +33,18 @@ export type ProductCategory =
   | "Videos"
   | "Virtual Reality";
 
+
 export type Product = {
-  id: string;
+  id: number;
   name: string;
   price: number;
-  description?: string;
-  image?: string;
-  /** Optional YouTube video URL for the product preview */
-  videoUrl?: string;
-  category?: ProductCategory;
-  likes?: number;
-  createdAt: string; // ISO date string
-};
-
+  description: string;
+  image: string | null;
+  videoUrl: string | null;
+  category: string | null;
+  likes: number | null;
+  createdAt: string;
+}
 // ─── Cart ────────────────────────────────────────────────────────────────────
 export type CartItem = Product & {
   quantity: number;
@@ -67,22 +66,32 @@ export type MidtransTransaction = {
 };
 
 // ─── State ───────────────────────────────────────────────────────────────────
-export type ProductState = {
+export type ProductState = CartState & {
   products: Product[];
+};
+
+// ─── State ───────────────────────────────────────────────────────────────────
+export type CartState = {
   cart: CartItem[];
   checkoutStatus: CheckoutStatus;
   snapToken: string | null;
+  loading: boolean;
+  error: string | null;
 };
-
 // ─── Actions ─────────────────────────────────────────────────────────────────
 export type ProductAction =
+  | { type: "UPDATE_PRODUCT"; payload: Product }
   | { type: "SET_PRODUCTS"; payload: Product[] }
+  | { type: "DELETE_PRODUCT"; payload: number }
   | { type: "ADD_TO_CART"; payload: Product }
-  | { type: "REMOVE_FROM_CART"; payload: string } // product id
+  | { type: "REMOVE_FROM_CART"; payload: number } // product id
   | { type: "CLEAR_CART" }
   | { type: "SET_CHECKOUT_STATUS"; payload: CheckoutStatus }
   | { type: "SET_SNAP_TOKEN"; payload: string | null }
-  | { type: "SET_CART"; payload: CartItem[] };
+  | { type: "SET_CART"; payload: CartItem[] }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
+  ;
 
 // ── Sort ──────────────────────────────────────────────────────────────────────
 export type SortKey =
@@ -141,17 +150,59 @@ export const CATEGORIES: CategoryFilter[] = [
 
 
 export interface User {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
+  id: string;
+  name: string;
+  email: string;
+  role: string;
 }
 
 export interface Voucher {
-    id: number | undefined;
-    code: string;
-    discount: string;
-    expiredAt:string;
-    createdAt: string;
-    updatedAt: string;
+  id: number | undefined;
+  code: string;
+  discount: string;
+  expiredAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Midtrans Transaction Status ─────────────────────────────────────────────
+export type MidtransTransactionStatus =
+  | 'capture'      // Card payment accepted
+  | 'settlement'   // Payment completed
+  | 'pending'      // Waiting for payment
+  | 'deny'         // Payment denied
+  | 'cancel'       // Canceled by merchant/user
+  | 'expire'       // Payment expired
+  | 'failure'      // Payment failed
+  | 'refund'       // Refunded
+  | 'partial_refund' // Partially refunded
+  | 'authorize';   // Pre-authorized
+
+export type MidtransFraudStatus = 'accept' | 'challenge' | 'deny';
+
+export interface MidtransTransactionResponse {
+  status_code: string;
+  status_message: string;
+  transaction_id: string;
+  order_id: string;
+  gross_amount: string;
+  payment_type: string;
+  transaction_time: string;
+  transaction_status: MidtransTransactionStatus;
+  fraud_status?: MidtransFraudStatus;
+  signature_key?: string;
+  bank?: string;
+  va_numbers?: Array<{ bank: string; va_number: string }>;
+  permata_va_number?: string;
+  biller_code?: string;
+  bill_key?: string;
+  acquirer?: string;
+  masked_card?: string;
+  card_type?: string;
+  approval_code?: string;
+  channel_response_code?: string;
+  channel_response_message?: string;
+  currency?: string;
+  settlement_time?: string;
+  expiry_time?: string;
 }

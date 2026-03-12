@@ -9,7 +9,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
-import { useProductContext } from "../../store/context/ProductContext";
+import { useCartContext } from "../../store/context/cart/CartContext";
 import { getYouTubeEmbedUrl } from "../../utils/utils";
 
 type CartDrawerProps = {
@@ -25,7 +25,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
     removeFromCart,
     addToCart,
     clearCart,
-  } = useProductContext();
+  } = useCartContext();
 
   return (
     <AnimatePresence>

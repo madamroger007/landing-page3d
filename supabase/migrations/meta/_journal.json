@@ -15,6 +15,13 @@
       "when": 1773222623610,
       "tag": "0001_low_doctor_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773309866334,
+      "tag": "0002_cuddly_switch",
+      "breakpoints": true
     }
   ]
 }

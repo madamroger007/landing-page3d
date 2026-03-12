@@ -4,7 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import NavbarDashboard from '@/src/components/dashboard/NavbarDashboard';
 import { Category, CategoryFormData, CategoryFormError } from '@/src/components/dashboard/products/types';
-import { createCategory, updateCategory } from '@/src/server/actions/dashboard';
+import { createCategory, updateCategory } from '@/src/server/actions/products/action';
 
 const defaultFormData: CategoryFormData = {
     name: '',

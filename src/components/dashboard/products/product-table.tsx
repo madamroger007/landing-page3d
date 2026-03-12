@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Product } from './types';
+import Image from 'next/image';
+import { Product } from '@/src/types/type';
 
 interface ProductTableProps {
     products: Product[];
@@ -19,6 +20,9 @@ export function ProductTable({ products, onDelete }: ProductTableProps) {
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
                             Price
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
+                            Video Link
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
                             Category
@@ -73,9 +77,11 @@ function ProductRow({ product, onDelete }: ProductRowProps) {
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
                     {product.image && (
-                        <img
+                        <Image
                             src={product.image}
                             alt={product.name}
+                            width={40}
+                            height={40}
                             className="w-10 h-10 rounded-md object-cover mr-3"
                         />
                     )}
@@ -84,6 +90,11 @@ function ProductRow({ product, onDelete }: ProductRowProps) {
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
                 <span className="text-sm text-gray-300">{formatPrice(product.price)}</span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <Link href={product.videoUrl || ''} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-300 hover:text-blue-300">
+                   Link Video
+                </Link>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
                 <span className="text-sm text-gray-300">{product.category || '-'}</span>

@@ -16,13 +16,13 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomCursor from "../../../../components/CustomCursor";
-import { useProductContext } from "@/src/store/context/ProductContext";
+import { useCartContext } from "@/src/store/context/cart/CartContext";
 import { Orders } from "@/src/types/type";
 
 export default function PaymentStatusPage() {
   const { orderId } = useParams();
   const router = useRouter();
-  const { checkoutStatus, clearCart } = useProductContext();
+  const { clearCart } = useCartContext();
   const [order, setOrder] = useState<Orders | null>(null);
   const [copied, setCopied] = useState(false);
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function PaymentStatusPage() {
     const foundOrder = savedOrders[orderId as string];
 
     if (foundOrder) {
-      setOrder(foundOrder);
+      Promise.resolve().then(() => setOrder(foundOrder));
     } else {
       // If not found, maybe redirect to products
       setTimeout(() => router.push("/products"), 3000);

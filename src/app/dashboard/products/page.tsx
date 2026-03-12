@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import NavbarDashboard from '@/src/components/dashboard/NavbarDashboard';
 import { useProducts, ProductTable } from '@/src/components/dashboard/products';
+import { useProductContext } from '@/src/store/context/product/ProductContext';
 
 // ─── Loading Spinner ─────────────────────────────────────────────────────────
 
@@ -41,10 +42,11 @@ function ErrorDisplay({ message }: { message: string }) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function ProductsPage() {
-    const products = useProducts();
+    const { products, loading, error } = useProductContext();
+    const { handleDelete } = useProducts();
 
-    if (products.loading) return <LoadingSpinner />;
-    if (products.error) return <ErrorDisplay message={products.error} />;
+    if (loading) return <LoadingSpinner />;
+    if (error) return <ErrorDisplay message={error} />;
 
     return (
         <div className="min-h-screen">
@@ -71,8 +73,8 @@ export default function ProductsPage() {
                     </div>
 
                     <ProductTable
-                        products={products.products}
-                        onDelete={products.handleDelete}
+                        products={products}
+                        onDelete={handleDelete}
                     />
                 </div>
             </main>

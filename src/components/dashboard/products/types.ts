@@ -1,18 +1,8 @@
 import { ZodErrorProductSchema, ZodErrorCategorySchema } from '@/src/server/validations/products';
+import { Product } from '@/src/types/type';
 
 // ─── Product Types ───────────────────────────────────────────────────────────
 
-export interface Product {
-    id: number;
-    name: string;
-    price: number;
-    description: string;
-    image: string | null;
-    videoUrl: string | null;
-    category: string | null;
-    likes: number | null;
-    createdAt: string;
-}
 
 export interface ProductFormData {
     name: string;
@@ -44,10 +34,8 @@ export type CategoryFormError = ZodErrorCategorySchema | null;
 
 export interface UseProductsReturn {
     // Data
-    products: Product[];
     categories: Category[];
-    loading: boolean;
-    error: string;
+
 
     // Modal state
     showModal: boolean;

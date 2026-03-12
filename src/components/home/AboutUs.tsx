@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import InteractiveStack from "../card/InteractiveStack";
-import { useProductContext } from "@/src/store/context/ProductContext";
+import { useProductContext } from "@/src/store/context/product/ProductContext";
 
 export default function AboutUs() {
     const { products } = useProductContext()

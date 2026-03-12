@@ -1,7 +1,8 @@
 import {
-    productRepository,
+    cachedProductRepository,
     SelectCategory,
-} from '@/src/server/repositories/products';
+
+} from '@/src/server/repositories/products/cached';
 import { SelectProduct, InsertProduct } from '@/src/server/db/schema/products';
 import { ProductSchema, UpdateProductSchema, CategorySchema } from '@/src/server/validations/products';
 
@@ -11,11 +12,11 @@ export const productService = {
     // ── Products ───────────────────────────────────────────────────────────
 
     async getProducts(): Promise<SelectProduct[]> {
-        return productRepository.getProducts();
+        return cachedProductRepository.getProducts();
     },
 
     async getProductById(id: number): Promise<SelectProduct | null> {
-        const product = await productRepository.getProductById(id);
+        const product = await cachedProductRepository.getProductById(id);
         return product ?? null;
     },
 
@@ -33,14 +34,14 @@ export const productService = {
             createdAt: now,
         };
 
-        return productRepository.createProduct(productData);
+        return cachedProductRepository.createProduct(productData);
     },
 
     async updateProduct(id: number, data: UpdateProductSchema): Promise<SelectProduct | null> {
-        const existing = await productRepository.getProductById(id);
+        const existing = await cachedProductRepository.getProductById(id);
         if (!existing) return null;
 
-        const updated = await productRepository.updateProduct(id, {
+        const updated = await cachedProductRepository.updateProduct(id, {
             ...(data.name !== undefined && { name: data.name }),
             ...(data.price !== undefined && { price: data.price }),
             ...(data.description !== undefined && { description: data.description }),
@@ -53,46 +54,46 @@ export const productService = {
     },
 
     async deleteProduct(id: number): Promise<boolean> {
-        const existing = await productRepository.getProductById(id);
+        const existing = await cachedProductRepository.getProductById(id);
         if (!existing) return false;
 
-        await productRepository.deleteProduct(id);
+        await cachedProductRepository.deleteProduct(id);
         return true;
     },
 
     async searchProducts(query: string): Promise<SelectProduct[]> {
-        if (!query.trim()) return productRepository.getProducts();
-        return productRepository.searchProducts(query);
+        if (!query.trim()) return cachedProductRepository.getProducts();
+        return cachedProductRepository.searchProducts(query);
     },
 
     async getProductsByCategory(category: string): Promise<SelectProduct[]> {
-        return productRepository.getProductsByCategory(category);
+        return cachedProductRepository.getProductsByCategory(category);
     },
 
     async likeProduct(id: number): Promise<SelectProduct | null> {
-        const updated = await productRepository.incrementLikes(id);
+        const updated = await cachedProductRepository.incrementLikes(id);
         return updated ?? null;
     },
 
     // ── Categories ─────────────────────────────────────────────────────────
 
     async getCategories(): Promise<SelectCategory[]> {
-        return productRepository.getCategories();
+        return cachedProductRepository.getCategories();
     },
 
     async getCategoryById(id: number): Promise<SelectCategory | null> {
-        const category = await productRepository.getCategoryById(id);
+        const category = await cachedProductRepository.getCategoryById(id);
         return category ?? null;
     },
 
     async createCategory(data: CategorySchema): Promise<SelectCategory | { error: string }> {
-        const existing = await productRepository.getCategoryByName(data.name);
+        const existing = await cachedProductRepository.getCategoryByName(data.name);
         if (existing) {
             return { error: 'Category with this name already exists' };
         }
 
         const now = new Date().toISOString();
-        return productRepository.createCategory({
+        return cachedProductRepository.createCategory({
             name: data.name,
             createdAt: now,
             updatedAt: now,
@@ -100,17 +101,17 @@ export const productService = {
     },
 
     async updateCategory(id: number, data: CategorySchema): Promise<SelectCategory | null | { error: string }> {
-        const existing = await productRepository.getCategoryById(id);
+        const existing = await cachedProductRepository.getCategoryById(id);
         if (!existing) return null;
 
         // Check if name already exists on another category
-        const duplicate = await productRepository.getCategoryByName(data.name);
+        const duplicate = await cachedProductRepository.getCategoryByName(data.name);
         if (duplicate && duplicate.id !== id) {
             return { error: 'Category with this name already exists' };
         }
 
         const now = new Date().toISOString();
-        const updated = await productRepository.updateCategory(id, {
+        const updated = await cachedProductRepository.updateCategory(id, {
             name: data.name,
             updatedAt: now,
         });
@@ -119,10 +120,10 @@ export const productService = {
     },
 
     async deleteCategory(id: number): Promise<boolean> {
-        const existing = await productRepository.getCategoryById(id);
+        const existing = await cachedProductRepository.getCategoryById(id);
         if (!existing) return false;
 
-        await productRepository.deleteCategory(id);
+        await cachedProductRepository.deleteCategory(id);
         return true;
     },
 };

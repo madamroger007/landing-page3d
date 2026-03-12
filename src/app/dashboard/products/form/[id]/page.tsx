@@ -3,8 +3,12 @@
 import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import NavbarDashboard from '@/src/components/dashboard/NavbarDashboard';
-import { Product, ProductFormData, ProductFormError, Category } from '@/src/components/dashboard/products/types';
-import { createProduct, updateProduct } from '@/src/server/actions/dashboard';
+import ImageUploader from '@/src/components/dashboard/products/ImageUploader';
+import { ProductFormData, ProductFormError, Category } from '@/src/components/dashboard/products/types';
+import { createProductAction, updateProductAction } from '@/src/server/actions/products/action';
+import { Product } from '@/src/types/type';
+import { useProductContext } from '@/src/store/context/product/ProductContext';
+import { formErrorStatement } from '@/src/utils/error';
 
 const defaultFormData: ProductFormData = {
     name: '',
@@ -20,12 +24,16 @@ export default function ProductFormPage() {
     const params = useParams();
     const productId = params.id as string;
     const isEdit = productId !== 'new';
-
+    const {
+        setProducts,
+        updateProduct,
+    } = useProductContext();
     const [loading, setLoading] = useState(isEdit);
     const [categories, setCategories] = useState<Category[]>([]);
     const [formData, setFormData] = useState<ProductFormData>(defaultFormData);
     const [formError, setFormError] = useState<ProductFormError>(null);
     const [formLoading, setFormLoading] = useState(false);
+    const [pendingFile, setPendingFile] = useState<File | null>(null);
 
     // ── Fetch product if editing ───────────────────────────────────────────
 
@@ -85,6 +93,7 @@ export default function ProductFormPage() {
         setFormError(null);
     };
 
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormLoading(true);
@@ -96,22 +105,19 @@ export default function ProductFormPage() {
                 image: formData.image || null,
                 videoUrl: formData.videoUrl || null,
                 category: formData.category || null,
+                file: pendingFile,
+                oldImageUrl: isEdit && pendingFile ? formData.image : null,
             };
 
-            const data = isEdit
-                ? await updateProduct(Number(productId), body)
-                : await createProduct(body);
+            if (isEdit) {
+                const response = await updateProductAction(Number(productId), body);
+                formErrorStatement(response, setFormError);
 
-            if (!data.success) {
-                if (data.errors) {
-                    setFormError(data.errors);
-                } else {
-                    setFormError({
-                        formErrors: [data.message || 'Operation failed'],
-                        fieldErrors: {},
-                    });
-                }
-                return;
+                updateProduct(response.product);
+            } else {
+                const response = await createProductAction(body);
+                formErrorStatement(response, setFormError);
+                setProducts(response);
             }
 
             router.push('/dashboard/products');
@@ -239,20 +245,19 @@ export default function ProductFormPage() {
                                 </select>
                             </div>
 
-                            {/* Image URL */}
+                            {/* Image Upload */}
                             <div>
-                                <label htmlFor="image" className="block text-sm font-medium text-gray-100">
-                                    Image URL
+                                <label className="block text-sm font-medium text-gray-100 mb-2">
+                                    Product Image
                                 </label>
-                                <input
-                                    type="url"
-                                    id="image"
-                                    name="image"
+                                <ImageUploader
                                     value={formData.image}
-                                    onChange={handleChange}
-                                    placeholder="https://example.com/image.jpg"
-                                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${formError?.fieldErrors.image ? 'border-red-500' : 'border-gray-300'
-                                        }`}
+                                    onFileChange={setPendingFile}
+                                    onRemove={() => {
+                                        setFormData((prev) => ({ ...prev, image: '' }));
+                                        setPendingFile(null);
+                                    }}
+                                    disabled={formLoading}
                                 />
                                 {formError?.fieldErrors.image && (
                                     <p className="mt-1 text-xs text-red-500">{formError.fieldErrors.image[0]}</p>

@@ -2,17 +2,18 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-    Product,
     Category,
     ProductFormData,
     ProductFormError,
     UseProductsReturn,
 } from './types';
 import {
-    createProduct,
-    updateProduct,
+    createProductAction,
+    updateProductAction,
     deleteProduct as deleteProductAction,
-} from '@/src/server/actions/dashboard';
+} from '@/src/server/actions/products/action';
+import { Product } from '@/src/types/type';
+import { useProductContext } from '@/src/store/context/product/ProductContext';
 
 const defaultFormData: ProductFormData = {
     name: '',
@@ -24,36 +25,17 @@ const defaultFormData: ProductFormData = {
 };
 
 export function useProducts(): UseProductsReturn {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
 
+    const [categories, setCategories] = useState<Category[]>([]);
+    const {
+        deleteProduct
+    } = useProductContext();
     // Modal state
     const [showModal, setShowModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [formData, setFormData] = useState<ProductFormData>(defaultFormData);
     const [formError, setFormError] = useState<ProductFormError>(null);
     const [formLoading, setFormLoading] = useState(false);
-
-    // ── Fetch data ─────────────────────────────────────────────────────────
-
-    const fetchProducts = useCallback(async () => {
-        try {
-            const response = await fetch('/api/products');
-            const data = await response.json();
-
-            if (data.success) {
-                setProducts(data.products);
-            } else {
-                setError(data.message || 'Failed to fetch products');
-            }
-        } catch {
-            setError('An unexpected error occurred');
-        } finally {
-            setLoading(false);
-        }
-    }, []);
 
     const fetchCategories = useCallback(async () => {
         try {
@@ -69,9 +51,8 @@ export function useProducts(): UseProductsReturn {
     }, []);
 
     useEffect(() => {
-        fetchProducts();
         fetchCategories();
-    }, [fetchProducts, fetchCategories]);
+    }, [fetchCategories]);
 
     // ── Form handlers ──────────────────────────────────────────────────────
 
@@ -125,8 +106,8 @@ export function useProducts(): UseProductsReturn {
             };
 
             const data = editingProduct
-                ? await updateProduct(editingProduct.id, body)
-                : await createProduct(body);
+                ? await updateProductAction(editingProduct.id, body)
+                : await createProductAction(body);
 
             if (!data.success) {
                 if (data.errors) {
@@ -141,7 +122,6 @@ export function useProducts(): UseProductsReturn {
             }
 
             handleCloseModal();
-            fetchProducts();
         } catch {
             setFormError({
                 formErrors: ['An unexpected error occurred'],
@@ -163,19 +143,19 @@ export function useProducts(): UseProductsReturn {
             if (!data.success) {
                 alert(data.message || 'Failed to delete product');
                 return;
+            } else {
+                alert(data.message || 'Product deleted successfully');
+                deleteProduct(productId);
+                console.log(`Product with ID ${productId} deleted successfully`);
             }
 
-            fetchProducts();
         } catch {
             alert('An unexpected error occurred');
         }
     };
 
     return {
-        products,
         categories,
-        loading,
-        error,
         showModal,
         editingProduct,
         formData,

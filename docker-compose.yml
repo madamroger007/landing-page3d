@@ -21,6 +21,8 @@ services:
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
       # Redis connection for caching
       - REDIS_URL=redis://cache:6379
+      # Redis connection for queue (BullMQ)
+      - REDIS_QUEUE_URL=redis://queue:6379
       # Hot-reload settings for Docker (IMPORTANT for dev mode)
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true

@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import InteractiveStack from "../card/InteractiveStack";
-import { useProductContext } from "../../store/context/ProductContext";
+import { useProductContext } from "../../store/context/product/ProductContext";
 
 
 // ... (stats definition)

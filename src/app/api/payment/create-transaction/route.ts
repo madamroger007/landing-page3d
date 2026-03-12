@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Item, MidtransTransaction } from '@/src/types/type';
 import { requireApiToken } from '@/src/lib/auth/withAuth';
+import { ordersRepository } from '@/src/server/repositories/orders';
 
 const MIDTRANS_API_URL = 'https://app.sandbox.midtrans.com/snap/v1/transactions';
 
@@ -55,6 +56,24 @@ export async function POST(req: NextRequest) {
         }
 
         const data = await midtransRes.json();
+
+        // Save order to database
+        try {
+            await ordersRepository.createOrder({
+                orderId: order_id,
+                grossAmount: gross_amount,
+                snapToken: data.token,
+                items: JSON.stringify(items),
+                customerName: customer?.name,
+                customerEmail: customer?.email,
+                customerPhone: customer?.phone,
+                transactionStatus: 'pending',
+            });
+        } catch (dbError) {
+            console.error('[create-transaction] Failed to save order:', dbError);
+            // Continue even if DB save fails - transaction was created in Midtrans
+        }
+
         return NextResponse.json({ snap_token: data.token });
     } catch (err) {
         console.error('[create-transaction]', err);

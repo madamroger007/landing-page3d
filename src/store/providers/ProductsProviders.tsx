@@ -1,6 +1,6 @@
 "use client";
 
-import { ProductProvider } from "../context/ProductContext";
+import { ProductProvider } from "../context/product/ProductContext";
 
 /**
  * Aggregate all store providers here.

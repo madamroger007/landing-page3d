@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Heart, ShoppingCart, Check, Play } from "lucide-react";
-import { useProductContext } from "../../store/context/ProductContext";
+import { Heart, ShoppingCart, Check } from "lucide-react";
+import { useCartContext } from "../../store/context/cart/CartContext";
 import { Product } from "@/src/types/type";
 import { getYouTubeEmbedUrl } from "../../utils/utils";
 
@@ -14,7 +14,7 @@ type ProductCardProps = {
 };
 
 export default function ProductCard({ product, index }: ProductCardProps) {
-  const { addToCart, cart } = useProductContext();
+  const { addToCart, cart } = useCartContext();
   const [liked, setLiked] = useState(false);
   const inCart = cart.some((c) => c.id === product.id);
 

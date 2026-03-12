@@ -1,21 +1,27 @@
-import { CartItem, ProductAction, ProductState } from "@/src/types/type";
+import { CartItem, CartState, ProductAction } from "@/src/types/type";
 
 
-export const initialState: ProductState = {
-  products: [],
+export const initialState: CartState = {
   cart: [],
   checkoutStatus: "idle",
   snapToken: null,
+  loading: false,
+  error: null,
 };
 
-export function productReducer(
-  state: ProductState,
+export function cartReducer(
+  state: CartState,
   action: ProductAction
-): ProductState {
+): CartState {
   switch (action.type) {
-    // ── Products ────────────────────────────────────────────────────────────
-    case "SET_PRODUCTS":
-      return { ...state, products: action.payload };
+    default:
+      return state;
+    // ── Loading and Error ───────────────────────────────────────────────────
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+
+    case "SET_ERROR":
+      return { ...state, error: action.payload };
 
     // ── Cart ────────────────────────────────────────────────────────────────
     case "ADD_TO_CART": {
@@ -54,17 +60,8 @@ export function productReducer(
     case "CLEAR_CART":
       return { ...state, cart: [], snapToken: null, checkoutStatus: "idle" };
 
-    // ── Checkout ────────────────────────────────────────────────────────────
-    case "SET_CHECKOUT_STATUS":
-      return { ...state, checkoutStatus: action.payload };
-
-    case "SET_SNAP_TOKEN":
-      return { ...state, snapToken: action.payload };
-
     case "SET_CART":
       return { ...state, cart: action.payload };
 
-    default:
-      return state;
   }
 }

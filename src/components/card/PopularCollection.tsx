@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Heart, Shovel as Sparkles } from "lucide-react";
 import FireEffect from "../FireEffect";
-import { useProductContext } from "../../store/context/ProductContext";
+import { useProductContext } from "../../store/context/product/ProductContext";
 import { getYouTubeEmbedUrl } from "../../utils/utils";
 
 const categories = ["All", "Social Media", "Product Image", "Poster", "Banner", "Logo Image", "Animation VFX", "Product Video", "Logo Video", "Landing Page", "Asset 2D", "Asset 3D"];

@@ -11,7 +11,8 @@ import {
     createCategory,
     updateCategory,
     deleteCategory as deleteCategoryAction,
-} from '@/src/server/actions/dashboard';
+    getCategories,
+} from '@/src/server/actions/products/action';
 
 const defaultFormData: CategoryFormData = {
     name: '',
@@ -33,9 +34,7 @@ export function useCategories(): UseCategoriesReturn {
 
     const fetchCategories = useCallback(async () => {
         try {
-            const response = await fetch('/api/products/categories');
-            const data = await response.json();
-
+            const data = await getCategories();
             if (data.success) {
                 setCategories(data.categories);
             } else {

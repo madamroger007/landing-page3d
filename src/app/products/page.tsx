@@ -14,7 +14,7 @@ import {
   Check,
   ArrowLeft,
 } from "lucide-react";
-import { useProductContext } from "../../store/context/ProductContext";
+import { useProductContext } from "../../store/context/product/ProductContext";
 import CartDrawer from "../../components/products/CartDrawer";
 import ProductCard from "../../components/card/ProductCard";
 import {
