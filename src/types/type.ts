@@ -36,11 +36,19 @@ export type Item = {
   image?: string,
   videoUrl?: string,
   price: number,
-  quantity: number
+  quantity: number,
+  category?: string
 }
 
 // ─── Product ─────────────────────────────────────────────────────────────────
 export type ProductCategory = {
+  id: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ProductTool = {
   id: number;
   name: string;
   createdAt: string;
@@ -56,6 +64,8 @@ export type Product = {
   image: string | null;
   videoUrl: string | null;
   category: string | null;
+  tools?: ProductTool[];
+  toolIds?: number[];
   likes: number | null;
   createdAt: string;
 }
@@ -84,6 +94,7 @@ export type MidtransTransaction = {
 export type ProductState = Omit<CartState, 'cart'> & {
   products: Product[];
   categories: ProductCategory[];
+  tools: ProductTool[];
 };
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -105,6 +116,10 @@ export type ProductAction =
   | { type: "UPDATE_CATEGORY"; payload: ProductCategory }
   | { type: "DELETE_CATEGORY"; payload: number }
   | { type: "ADD_CATEGORY"; payload: ProductCategory }
+  | { type: "SET_TOOLS"; payload: ProductTool[] }
+  | { type: "UPDATE_TOOL"; payload: ProductTool }
+  | { type: "DELETE_TOOL"; payload: number }
+  | { type: "ADD_TOOL"; payload: ProductTool }
 
   ;
 

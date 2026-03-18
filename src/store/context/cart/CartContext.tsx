@@ -107,6 +107,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                         name: item.name,
                         price: item.price,
                         quantity: item.quantity,
+                        category: item.category || "Uncategorized",
+                        image: item.image || "",
+                        videoUrl: item.videoUrl || ""
                     })),
                     customer,
                     payment_method,

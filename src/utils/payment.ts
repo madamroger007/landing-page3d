@@ -8,6 +8,7 @@ type PaymentPersistenceOptions = {
 };
 
 type MidtransVaNumber = { bank?: string; va_number?: string };
+type MidtransBankTransfer = { bank?: string; va_number?: string; va_numbers?: MidtransVaNumber[] };
 
 const PROVIDER_NAME_MAP: Record<string, string> = {
     alfamart: "Alfamart",
@@ -47,11 +48,49 @@ export function normalizeProviderName(value: string) {
 }
 
 function extractVaNumbers(data: Record<string, unknown>) {
-    if (!Array.isArray(data.va_numbers)) {
-        return [] as MidtransVaNumber[];
+    const vaNumbers: MidtransVaNumber[] = [];
+
+    if (Array.isArray(data.va_numbers)) {
+        vaNumbers.push(...(data.va_numbers as MidtransVaNumber[]));
     }
 
-    return data.va_numbers as MidtransVaNumber[];
+    const bankTransfer = (data.bank_transfer as MidtransBankTransfer | undefined) || undefined;
+    if (Array.isArray(bankTransfer?.va_numbers)) {
+        vaNumbers.push(...bankTransfer.va_numbers);
+    }
+
+    const fallbackBank = asNonEmptyString(data.bank) || asNonEmptyString(bankTransfer?.bank);
+    const providerSpecificVaFields: Array<{ bank?: string; value?: unknown }> = [
+        { bank: "bca", value: data.bca_va_number },
+        { bank: "bni", value: data.bni_va_number },
+        { bank: "bri", value: data.bri_va_number },
+        { bank: "cimb", value: data.cimb_va_number },
+        { bank: "seabank", value: data.seabank_va_number },
+        { bank: fallbackBank, value: bankTransfer?.va_number },
+        { bank: fallbackBank, value: data.va_number },
+    ];
+
+    for (const entry of providerSpecificVaFields) {
+        const va = asNonEmptyString(entry.value);
+        if (!va) continue;
+
+        vaNumbers.push({
+            bank: entry.bank,
+            va_number: va,
+        });
+    }
+
+    // Deduplicate by VA value to avoid double-rendering when payload exposes both list and single fields.
+    const seenVa = new Set<string>();
+    return vaNumbers.filter((entry) => {
+        const va = asNonEmptyString(entry.va_number);
+        if (!va || seenVa.has(va)) {
+            return false;
+        }
+
+        seenVa.add(va);
+        return true;
+    });
 }
 
 export function extractPaymentPersistenceFields(
@@ -60,8 +99,9 @@ export function extractPaymentPersistenceFields(
 ): PaymentPersistenceFields {
     const vaNumbers = extractVaNumbers(data);
     const firstVa = vaNumbers.find((entry) => asNonEmptyString(entry?.va_number));
+    const bankTransfer = (data.bank_transfer as MidtransBankTransfer | undefined) || undefined;
     const preferredPaymentName = asNonEmptyString(options.preferredPaymentName);
-    const bank = asNonEmptyString(data.bank);
+    const bank = asNonEmptyString(data.bank) || asNonEmptyString(bankTransfer?.bank);
     const store = asNonEmptyString(data.store);
     const paymentType = asNonEmptyString(data.payment_type);
     const paymentTypeName =
@@ -82,6 +122,7 @@ export function extractPaymentPersistenceFields(
 
     const paymentVa =
         asNonEmptyString(firstVa?.va_number) ||
+        asNonEmptyString(data.va_number) ||
         asNonEmptyString(data.bill_key) ||
         asNonEmptyString(data.payment_code) ||
         null;

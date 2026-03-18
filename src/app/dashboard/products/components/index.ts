@@ -3,3 +3,4 @@
 
 export { ProductTable } from './product-table';
 export { CategoryTable } from './category-table';
+export { ToolTable } from './tool-table';

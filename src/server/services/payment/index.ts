@@ -1,6 +1,9 @@
 import { Item, MidtransTransaction } from "@/src/types/type";
 import { midtransProvider } from "@/src/server/providers/midtransProvider";
 import { extractPaymentPersistenceFields, PaymentPersistenceFields } from "@/src/utils/payment";
+import { InsertOrder } from "../../db/schema/orders";
+import { ordersRepository } from "../../repositories/orders";
+import { SendPaymentLinkEmail } from "../email";
 
 type PaymentServiceResult = PaymentPersistenceFields & {
     order_id: string;
@@ -22,6 +25,8 @@ function resolvePaymentPayload(paymentMethod: string, orderId: string, cardToken
             return { payment_type: "bank_transfer", bank_transfer: { bank: "bni" } };
         case "bri_va":
             return { payment_type: "bank_transfer", bank_transfer: { bank: "bri" } };
+        case "seabank":
+            return { payment_type: "bank_transfer", bank_transfer: { bank: "seabank" }  };
         case "mandiri_va":
             return {
                 payment_type: "echannel",
@@ -30,8 +35,6 @@ function resolvePaymentPayload(paymentMethod: string, orderId: string, cardToken
                     bill_info2: orderId,
                 },
             };
-        case "seabank":
-            return { payment_type: "bank_transfer", bank_transfer: { bank: "seabank" } };
         case "credit_card":
             if (!cardTokenId) {
                 throw new Error("Credit card token is missing. Please retry card tokenization.");
@@ -134,9 +137,7 @@ export async function createPaymentWithCoreApi(payload: MidtransTransaction): Pr
     };
 
     const chargeResult = await midtransProvider.createCharge(chargePayload);
-    console.log("[createPaymentWithCoreApi] Charge result:", chargeResult);
     const paymentData = extractPaymentData(chargeResult, paymentMethod);
-    console.log("[createPaymentWithCoreApi] Extracted payment data:", paymentData);
 
     return {
         order_id: payload.order_id,
@@ -146,4 +147,30 @@ export async function createPaymentWithCoreApi(payload: MidtransTransaction): Pr
         payment_va: (paymentData.payment_va as string | null | undefined) ?? null,
         payment_data: paymentData,
     };
+}
+
+
+export async function createPaymentService(item: InsertOrder) {
+    await ordersRepository.createOrder({
+        orderId: item.orderId,
+        grossAmount: item.grossAmount,
+        snapToken: null,
+        items: item.items,
+        customerName: item.customerName,
+        customerEmail: item.customerEmail,
+        customerPhone: item.customerPhone,
+        transactionStatus: item.transactionStatus,
+        paymentType: item.paymentType,
+        paymentName: item.paymentName,
+        paymentVa: item.paymentVa,
+        transactionId: item.transactionId,
+    });
+
+    await SendPaymentLinkEmail({
+        email: item.customerEmail || "customer@example.com",
+        name: item.customerName || "Customer",
+        order_id: item.orderId,
+        total: item.grossAmount,
+        items: item.items,
+    });
 }

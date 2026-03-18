@@ -1,7 +1,6 @@
-import DirectPayment from '../../../../components/email/Directpayment';
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import { requireApiToken } from '@/src/lib/auth/withAuth';
+import { SendPaymentLinkEmail } from '@/src/server/services/email';
 
 /** POST /api/email/payment-link — requires Bearer token */
 export async function POST(req: NextRequest) {
@@ -9,16 +8,10 @@ export async function POST(req: NextRequest) {
     if (auth instanceof NextResponse) return auth;
 
     try {
-        const { email, name, order_id, total } = await req.json();
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        const link = `${process.env.NEXT_PUBLIC_URL}/checkout/payment/${order_id}`;
-
-        const { data, error } = await resend.emails.send({
-            from: `MadamSpace <${process.env.NEXT_PUBLIC_EMAIL}>`,
-            to: email,
-            subject: `Order - ${order_id} payment link`,
-            react: DirectPayment({ order_id, name, total, link }),
-        });
+        const { email, name, order_id, total, items } = await req.json();
+        const link = `${process.env.NEXT_PUBLIC_APP_URL}/checkout/payment/${order_id}`;
+        const body = { email, name, order_id, total, items, link };
+        const { data, error } = await SendPaymentLinkEmail(body);
 
         if (error) {
             return NextResponse.json({ success: false, error }, { status: 500 });

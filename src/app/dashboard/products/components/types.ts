@@ -1,4 +1,5 @@
 import { ZodErrorProductSchema, ZodErrorCategorySchema } from '@/src/server/validations/products';
+import { ZodErrorToolSchema } from '@/src/server/validations/tools';
 
 // ─── Product Types ───────────────────────────────────────────────────────────
 
@@ -21,6 +22,7 @@ export interface ProductFormData {
     image: string;
     videoUrl: string;
     category: string;
+    toolIds: number[];
 }
 
 export type ProductFormError = ZodErrorProductSchema | null;
@@ -39,3 +41,9 @@ export interface CategoryFormData {
 }
 
 export type CategoryFormError = ZodErrorCategorySchema | null;
+
+export interface ToolFormData {
+    name: string;
+}
+
+export type ToolFormError = ZodErrorToolSchema | null;

@@ -3,6 +3,8 @@ import { Syne, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import ProductsProviders from "../store/providers/ProductsProviders";
 import { CartProvider } from "../store/context/cart/CartContext";
+import GoogleAnalytics from "../components/analytics/GoogleAnalytics";
+import GoogleAdSense from "../components/analytics/GoogleAdSense";
 
 const syne = Syne({
   variable: "--font-syne",
@@ -15,8 +17,14 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "NFT Space | Create, Artwork and Sell",
-  description: "The world's biggest advanced commercial center for crypto collectibles and non-fungible tokens.",
+  title: "MadamSpace - Digital Services",
+  description: "Digital Services for make your designs come true and make your work easier",
+  authors: [
+    {
+      name: "Adam Setiadi",
+      url: "https://www.adamstd.my.id/",
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -24,11 +32,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaMeasurementId = process.env.NEXT_PUBLIC_GA_ID;
+  const adSensePublisherId = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID;
+
   return (
     <html lang="en">
       <body
         className={`${syne.variable} ${spaceGrotesk.variable} antialiased selection:bg-neon-blue selection:text-white cursor-hidden`}
       >
+        <GoogleAnalytics measurementId={gaMeasurementId} />
+        <GoogleAdSense publisherId={adSensePublisherId} />
         <CartProvider>
           <ProductsProviders>{children}</ProductsProviders>
         </CartProvider>

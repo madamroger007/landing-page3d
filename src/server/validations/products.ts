@@ -23,6 +23,8 @@ export const productSchema = z.object({
     videoUrl: z.string().url('Invalid video URL').optional().nullable(),
 
     category: z.string().optional().nullable(),
+
+    toolIds: z.array(z.number().int().positive()).optional().default([]),
 });
 
 export const updateProductSchema = productSchema.partial();
@@ -52,6 +54,7 @@ export interface ZodErrorProductSchema {
         image?: string[];
         videoUrl?: string[];
         category?: string[];
+        toolIds?: string[];
     };
 }
 

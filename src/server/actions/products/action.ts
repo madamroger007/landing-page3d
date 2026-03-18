@@ -6,6 +6,10 @@ function buildProductFormData(data: Record<string, unknown>): FormData {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
         if (value === undefined) return;
+        if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+            return;
+        }
         if (value instanceof File) {
             formData.append(key, value);
         } else {
@@ -35,6 +39,7 @@ export async function createProductAction(data: {
     image?: string | null;
     videoUrl?: string | null;
     category?: string | null;
+    toolIds?: number[];
     file?: File | null;
 }) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products`, {
@@ -57,6 +62,7 @@ export async function updateProductAction(
         image?: string | null;
         videoUrl?: string | null;
         category?: string | null;
+        toolIds?: number[];
         file?: File | null;
         oldImageUrl?: string | null;
     }
@@ -148,6 +154,56 @@ export async function updateCategory(categoryId: number, formData: { name: strin
 
 export async function deleteCategory(categoryId: number) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products/categories/${categoryId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
+        },
+    });
+
+    return response.json();
+}
+
+// ─── Tools Server Actions ───────────────────────────────────────────────────
+
+export async function getTools() {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products/tools`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
+        },
+    });
+
+    return response.json();
+}
+
+export async function createTool(formData: { name: string }) {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products/tools`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
+        },
+        body: JSON.stringify(formData),
+    });
+
+    return response.json();
+}
+
+export async function updateTool(toolId: number, formData: { name: string }) {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products/tools/${toolId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
+        },
+        body: JSON.stringify(formData),
+    });
+
+    return response.json();
+}
+
+export async function deleteTool(toolId: number) {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products/tools/${toolId}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,

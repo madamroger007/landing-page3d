@@ -1,31 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MidtransTransaction } from "@/src/types/type";
-import { ordersRepository } from "@/src/server/repositories/orders";
-import { createPaymentWithCoreApi } from "@/src/server/services/payment";
+import { createPaymentService, createPaymentWithCoreApi } from "@/src/server/services/payment";
 
 /** POST /api/payment/create-transaction — Core API charge flow */
 export async function POST(req: NextRequest) {
     try {
         const body: MidtransTransaction = await req.json();
         const { order_id, gross_amount, items, customer } = body;
-        console.log("[create-transaction] Received payload:", body);
         const paymentResult = await createPaymentWithCoreApi(body);
-
+        const bodyToSave = {
+            orderId: order_id,
+            grossAmount: gross_amount,
+            snapToken: null,
+            items: JSON.stringify(items),
+            customerName: customer?.name,
+            customerEmail: customer?.email,
+            customerPhone: customer?.phone,
+            transactionStatus: paymentResult.transaction_status,
+            paymentType: paymentResult.payment_method,
+            paymentName: paymentResult.payment_name,
+            paymentVa: paymentResult.payment_va,
+            transactionId: (paymentResult.payment_data.transaction_id as string | undefined) || null,
+        }
         try {
-            await ordersRepository.createOrder({
-                orderId: order_id,
-                grossAmount: gross_amount,
-                snapToken: null,
-                items: JSON.stringify(items),
-                customerName: customer?.name,
-                customerEmail: customer?.email,
-                customerPhone: customer?.phone,
-                transactionStatus: paymentResult.transaction_status,
-                paymentType: paymentResult.payment_method,
-                paymentName: paymentResult.payment_name,
-                paymentVa: paymentResult.payment_va,
-                transactionId: (paymentResult.payment_data.transaction_id as string | undefined) || null,
-            });
+            await createPaymentService(bodyToSave);
         } catch (dbError) {
             console.error("[create-transaction] Failed to save order:", dbError);
         }

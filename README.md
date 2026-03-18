@@ -16,6 +16,37 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Google Analytics (GA4)
+
+This project supports GA4 tracking for page views.
+
+1. Create `.env.local` in the project root.
+2. Add your Measurement ID:
+
+```bash
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+```
+
+3. Restart the dev server.
+
+If `NEXT_PUBLIC_GA_ID` is not set, analytics scripts will not be loaded.
+
+## Google AdSense
+
+This project supports loading Google AdSense globally.
+
+1. Add your AdSense publisher ID to `.env.local`:
+
+```bash
+NEXT_PUBLIC_GOOGLE_ADSENSE_ID=ca-pub-XXXXXXXXXXXXXXXX
+```
+
+2. Restart the dev server.
+
+If `NEXT_PUBLIC_GOOGLE_ADSENSE_ID` is not set, AdSense script will not be loaded.
+
+Note: Google Analytics tracks traffic; it does not pay ad revenue. Ad revenue comes from AdSense after your site is approved and ad units/Auto Ads are active.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

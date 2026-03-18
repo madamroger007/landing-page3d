@@ -61,11 +61,13 @@ export default function CategoryFormPage() {
             if (isEdit) {
                 const response = await updateCategoryAction(Number(categoryId), body);
                 formErrorStatement(response, setFormError);
+                if (!response.success) return;
 
                 updateCategory(response.category);
             } else {
                 const response = await createCategory(body);
                 formErrorStatement(response, setFormError);
+                if (!response.success) return;
                 addCategory(response.category);
             }
 

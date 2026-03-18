@@ -16,6 +16,7 @@ const defaultFormData: ProductFormData = {
     image: '',
     videoUrl: '',
     category: '',
+    toolIds: [],
 };
 
 export default function ProductFormPage() {
@@ -27,6 +28,7 @@ export default function ProductFormPage() {
         addProduct,
         updateProduct,
         categories,
+        tools,
         products,
     } = useProductContext();
     const [loading, setLoading] = useState(isEdit);
@@ -47,6 +49,7 @@ export default function ProductFormPage() {
                     image: product.image || '',
                     videoUrl: product.videoUrl || '',
                     category: product.category || '',
+                    toolIds: product.toolIds ?? product.tools?.map((tool) => tool.id) ?? [],
                 });
                 setLoading(false);
             }
@@ -78,6 +81,7 @@ export default function ProductFormPage() {
                 image: formData.image || null,
                 videoUrl: formData.videoUrl || null,
                 category: formData.category || null,
+                toolIds: formData.toolIds,
                 file: pendingFile,
                 oldImageUrl: isEdit && pendingFile ? formData.image : null,
             };
@@ -85,12 +89,14 @@ export default function ProductFormPage() {
             if (isEdit) {
                 const response = await updateProductAction(Number(productId), body);
                 formErrorStatement(response, setFormError);
+                if (!response.success) return;
 
                 updateProduct(response.product);
             } else {
                 const response = await createProductAction(body);
                 formErrorStatement(response, setFormError);
-                addProduct(response);
+                if (!response.success) return;
+                addProduct(response.product);
             }
 
             router.push('/dashboard/products');
@@ -102,6 +108,15 @@ export default function ProductFormPage() {
         } finally {
             setFormLoading(false);
         }
+    };
+
+    const handleToolChange = (toolId: number, checked: boolean) => {
+        setFormData((prev) => ({
+            ...prev,
+            toolIds: checked
+                ? [...prev.toolIds, toolId]
+                : prev.toolIds.filter((id) => id !== toolId),
+        }));
     };
 
     if (loading) {
@@ -234,6 +249,33 @@ export default function ProductFormPage() {
                                 />
                                 {formError?.fieldErrors.image && (
                                     <p className="mt-1 text-xs text-red-500">{formError.fieldErrors.image[0]}</p>
+                                )}
+                            </div>
+
+                            {/* Tools */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-100 mb-2">
+                                    Tools / Tech Used
+                                </label>
+                                <div className="grid grid-cols-2 gap-2 rounded-md border border-gray-700 p-3 bg-gray-800/50">
+                                    {tools.length === 0 ? (
+                                        <p className="text-sm text-gray-400 col-span-2">No tools available. Create tools first.</p>
+                                    ) : (
+                                        tools.map((tool) => (
+                                            <label key={tool.id} className="flex items-center gap-2 text-sm text-gray-200">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.toolIds.includes(tool.id)}
+                                                    onChange={(e) => handleToolChange(tool.id, e.target.checked)}
+                                                    className="rounded border-gray-500"
+                                                />
+                                                <span>{tool.name}</span>
+                                            </label>
+                                        ))
+                                    )}
+                                </div>
+                                {formError?.fieldErrors.toolIds && (
+                                    <p className="mt-1 text-xs text-red-500">{formError.fieldErrors.toolIds[0]}</p>
                                 )}
                             </div>
 

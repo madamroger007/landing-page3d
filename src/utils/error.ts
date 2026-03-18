@@ -1,6 +1,12 @@
-import { ProductFormError } from "../components/dashboard/products";
+type BaseFormError = {
+    formErrors: string[];
+    fieldErrors: Record<string, string[] | undefined>;
+};
 
-export const formErrorStatement = (response: { success: boolean; errors?: ProductFormError; message: string }, setFormError: React.Dispatch<React.SetStateAction<ProductFormError | null>>) => {
+export const formErrorStatement = <T extends BaseFormError>(
+    response: { success: boolean; errors?: T; message?: string },
+    setFormError: React.Dispatch<React.SetStateAction<T | null>>
+) => {
     if (!response.success) {
         if (response.errors) {
             setFormError(response.errors);
@@ -8,7 +14,7 @@ export const formErrorStatement = (response: { success: boolean; errors?: Produc
             setFormError({
                 formErrors: [response.message || 'Operation failed'],
                 fieldErrors: {},
-            });
+            } as T);
         }
         return;
     }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart, ShoppingCart, Check } from "lucide-react";
 import { useCartContext } from "../../store/context/cart/CartContext";
@@ -94,7 +95,20 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         <p className="text-white/30 text-xs leading-relaxed line-clamp-2 mb-4">
           {product.description}
         </p>
-
+        <div>
+          {product.tools && product.tools.length > 0 && (
+            <div className="flex items-center gap-2 mb-4">
+              {product.tools.slice(0, 3).map((tool) => (
+                <span
+                  key={tool.id}
+                  className="px-2 py-1 bg-white/10 border border-white/20 rounded-lg text-xs font-bold text-white/60"
+                >
+                  {tool.name}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="flex items-center justify-between mt-auto">
           <div>
             <p className="text-white/25 text-[10px] uppercase tracking-widest mb-0.5">
@@ -105,37 +119,47 @@ export default function ProductCard({ product, index }: ProductCardProps) {
             </p>
           </div>
 
-          <button
-            onClick={() => addToCart(product)}
-            aria-label={inCart ? "Already in cart" : "Add to cart"}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 ${inCart
-              ? "text-neon-blue"
-              : "hover:shadow-[0_0_20px_rgba(0,210,255,0.3)]"
-              }`}
-            style={
-              inCart
-                ? {
-                  background: "rgba(0,210,255,0.1)",
-                  border: "1px solid rgba(0,210,255,0.3)",
-                }
-                : {
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }
-            }
-          >
-            {inCart ? (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                In Cart
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-3.5 h-3.5" />
-                Add
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/products/${product.id}`}
+              className="px-3 py-2.5 rounded-xl text-xs font-bold text-white/80 hover:text-white transition-colors border border-white/15 hover:border-white/30"
+              aria-label={`View details for ${product.name}`}
+            >
+              Detail
+            </Link>
+
+            <button
+              onClick={() => addToCart(product)}
+              aria-label={inCart ? "Already in cart" : "Add to cart"}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 ${inCart
+                ? "text-neon-blue"
+                : "hover:shadow-[0_0_20px_rgba(0,210,255,0.3)]"
+                }`}
+              style={
+                inCart
+                  ? {
+                    background: "rgba(0,210,255,0.1)",
+                    border: "1px solid rgba(0,210,255,0.3)",
+                  }
+                  : {
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }
+              }
+            >
+              {inCart ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  In Cart
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  Add
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>

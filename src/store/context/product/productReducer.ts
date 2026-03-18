@@ -4,6 +4,7 @@ import { ProductAction, ProductState } from "@/src/types/type";
 export const initialState: ProductState = {
   products: [],
   categories: [],
+  tools: [],
   checkoutStatus: "idle",
   loading: false,
   error: null,
@@ -51,6 +52,23 @@ export function productReducer(
       return { ...state, categories: deletedCategories };
     case "ADD_CATEGORY":
       return { ...state, categories: [...state.categories, action.payload] };
+    // ── Tools ───────────────────────────────────────────────────────────────
+    case "SET_TOOLS":
+      return { ...state, tools: action.payload };
+    case "UPDATE_TOOL":
+      return {
+        ...state,
+        tools: state.tools.map((item) =>
+          item.id === action.payload.id ? action.payload : item
+        ),
+      };
+    case "DELETE_TOOL":
+      return {
+        ...state,
+        tools: state.tools.filter((item) => item.id !== action.payload),
+      };
+    case "ADD_TOOL":
+      return { ...state, tools: [...state.tools, action.payload] };
     // ── Loading and Error ───────────────────────────────────────────────────
     case "SET_LOADING":
       return { ...state, loading: action.payload };

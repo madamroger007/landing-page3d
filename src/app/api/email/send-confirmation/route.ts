@@ -1,7 +1,6 @@
-import { EmailTemplate } from '../../../../components/email/ConfirmationPayment';
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import { requireApiToken } from '@/src/lib/auth/withAuth';
+import { SendConfirmationEmail } from '@/src/server/services/email';
 
 /** POST /api/email/send-confirmation — requires Bearer token */
 export async function POST(req: NextRequest) {
@@ -10,15 +9,8 @@ export async function POST(req: NextRequest) {
 
     try {
         const { email, name, order_id, items, total } = await req.json();
-        const resend = new Resend(process.env.RESEND_API_KEY);
-
-        const { data, error } = await resend.emails.send({
-            from: `MadamSpace <${process.env.NEXT_PUBLIC_EMAIL}>`,
-            to: email,
-            subject: `Order Confirmation - ${order_id}`,
-            react: EmailTemplate({ items, order_id, name, total }),
-        });
-
+        const body = { email, name, order_id, items, total };
+        const { data, error } = await SendConfirmationEmail(body);
         if (error) {
             return NextResponse.json({ success: false, error }, { status: 500 });
         }

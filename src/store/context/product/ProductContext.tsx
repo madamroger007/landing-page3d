@@ -11,14 +11,16 @@ import { productReducer, initialState } from "./productReducer";
 import type {
   Product,
   ProductCategory,
+  ProductTool,
 } from "@/src/types/type";
-import { getCategories, getProducts } from "@/src/server/actions/products/action";
+import { getCategories, getProducts, getTools } from "@/src/server/actions/products/action";
 
 // ── Context shape ─────────────────────────────────────────────────────────────
 type ProductContextValue = {
   // State
   products: Product[];
   categories: ProductCategory[]; // Replace with actual Category type when defined
+  tools: ProductTool[];
   // Actions
   setProducts: (products: Product[]) => void;
   updateProduct: (productId: Product) => void;
@@ -30,6 +32,12 @@ type ProductContextValue = {
   updateCategory: (categoryId: ProductCategory) => void;
   deleteCategory: (categoryId: number) => void;
   addCategory: (category: ProductCategory) => void;
+
+  // tools
+  setTools: (tools: ProductTool[]) => void;
+  updateTool: (tool: ProductTool) => void;
+  deleteTool: (toolId: number) => void;
+  addTool: (tool: ProductTool) => void;
 
   loading: boolean;
   error: string | null;
@@ -67,6 +75,16 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       });
     }
 
+    const tools = localStorage.getItem("tools")
+    if (tools) {
+      dispatch({ type: "SET_TOOLS", payload: JSON.parse(tools) });
+    } else {
+      getTools().then((data) => {
+        dispatch({ type: "SET_TOOLS", payload: data.tools });
+        localStorage.setItem("tools", JSON.stringify(data.tools));
+      });
+    }
+
   }, []);
 
   useEffect(() => {
@@ -78,6 +96,10 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     localStorage.setItem("categories", JSON.stringify(state.categories));
   }, [state.categories]);
+
+  useEffect(() => {
+    localStorage.setItem("tools", JSON.stringify(state.tools));
+  }, [state.tools]);
 
 
   // Actions
@@ -114,6 +136,22 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "ADD_CATEGORY", payload: category });
   }, []);
 
+  const setTools = useCallback((tools: ProductTool[]) => {
+    dispatch({ type: "SET_TOOLS", payload: tools });
+  }, []);
+
+  const updateTool = useCallback((tool: ProductTool) => {
+    dispatch({ type: "UPDATE_TOOL", payload: tool });
+  }, []);
+
+  const deleteTool = useCallback((toolId: number) => {
+    dispatch({ type: "DELETE_TOOL", payload: toolId });
+  }, []);
+
+  const addTool = useCallback((tool: ProductTool) => {
+    dispatch({ type: "ADD_TOOL", payload: tool });
+  }, []);
+
 
   return (
     <ProductContext.Provider
@@ -123,11 +161,16 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
         updateProduct,
         deleteProduct,
         categories: state.categories,
+        tools: state.tools,
         setCategories,
         updateCategory,
         deleteCategory,
         addProduct,
         addCategory,
+        setTools,
+        updateTool,
+        deleteTool,
+        addTool,
         loading: state.loading,
         error: state.error,
       }}

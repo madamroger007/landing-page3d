@@ -41,6 +41,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         const formData = await request.formData();
         const file = formData.get('file') as File | null;
         const oldImageUrl = formData.get('oldImageUrl') as string | null;
+        const rawToolIds = formData.get('toolIds');
 
         // Build body from form data
         const body: Record<string, unknown> = {};
@@ -51,6 +52,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         });
         const price = formData.get('price');
         if (price !== null && price !== '') body.price = Number(price);
+        if (typeof rawToolIds === 'string' && rawToolIds.length > 0) {
+            body.toolIds = JSON.parse(rawToolIds);
+        }
 
         // Upload new image, delete old one
         if (file && file.size > 0) {
@@ -73,6 +77,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         }
 
         const product = await productService.updateProduct(Number(id), validation.data);
+        if (product && 'error' in product) {
+            return NextResponse.json(
+                { success: false, message: product.error },
+                { status: 400 }
+            );
+        }
+
         if (!product) {
             return NextResponse.json(
                 { success: false, message: 'Product not found' },

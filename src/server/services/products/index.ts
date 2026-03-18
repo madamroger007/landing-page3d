@@ -5,22 +5,46 @@ import {
 } from '@/src/server/repositories/products/cached';
 import { SelectProduct, InsertProduct } from '@/src/server/db/schema/products';
 import { ProductSchema, UpdateProductSchema, CategorySchema } from '@/src/server/validations/products';
+import { cachedToolRepository } from '@/src/server/repositories/tools/cached';
+import { SelectTool } from '@/src/server/db/schema/tools';
+
+export type ProductWithTools = SelectProduct & {
+    tools: SelectTool[];
+    toolIds: number[];
+};
 
 // ─── Product Service ─────────────────────────────────────────────────────────
 
 export const productService = {
+    async enrichProduct(product: SelectProduct): Promise<ProductWithTools> {
+        const tools = await cachedToolRepository.getToolsByProductId(product.id);
+        return {
+            ...product,
+            tools,
+            toolIds: tools.map((tool) => tool.id),
+        };
+    },
+
     // ── Products ───────────────────────────────────────────────────────────
 
-    async getProducts(): Promise<SelectProduct[]> {
-        return cachedProductRepository.getProducts();
+    async getProducts(): Promise<ProductWithTools[]> {
+        const products = await cachedProductRepository.getProducts();
+        return Promise.all(products.map((product) => this.enrichProduct(product)));
     },
 
-    async getProductById(id: number): Promise<SelectProduct | null> {
+    async getProductById(id: number): Promise<ProductWithTools | null> {
         const product = await cachedProductRepository.getProductById(id);
-        return product ?? null;
+        if (!product) return null;
+        return this.enrichProduct(product);
     },
 
-    async createProduct(data: ProductSchema): Promise<SelectProduct> {
+    async createProduct(data: ProductSchema): Promise<ProductWithTools | { error: string }> {
+        const toolIds = data.toolIds ?? [];
+        const isValidToolIds = await cachedToolRepository.validateToolIds(toolIds);
+        if (!isValidToolIds) {
+            return { error: 'One or more selected tools are invalid' };
+        }
+
         const now = new Date().toISOString();
 
         const productData: InsertProduct = {
@@ -34,12 +58,22 @@ export const productService = {
             createdAt: now,
         };
 
-        return cachedProductRepository.createProduct(productData);
+        const created = await cachedProductRepository.createProduct(productData);
+        await cachedToolRepository.replaceProductTools(created.id, toolIds);
+
+        return this.enrichProduct(created);
     },
 
-    async updateProduct(id: number, data: UpdateProductSchema): Promise<SelectProduct | null> {
+    async updateProduct(id: number, data: UpdateProductSchema): Promise<ProductWithTools | null | { error: string }> {
         const existing = await cachedProductRepository.getProductById(id);
         if (!existing) return null;
+
+        if (data.toolIds !== undefined) {
+            const isValidToolIds = await cachedToolRepository.validateToolIds(data.toolIds);
+            if (!isValidToolIds) {
+                return { error: 'One or more selected tools are invalid' };
+            }
+        }
 
         const updated = await cachedProductRepository.updateProduct(id, {
             ...(data.name !== undefined && { name: data.name }),
@@ -50,7 +84,13 @@ export const productService = {
             ...(data.category !== undefined && { category: data.category }),
         });
 
-        return updated ?? null;
+        if (!updated) return null;
+
+        if (data.toolIds !== undefined) {
+            await cachedToolRepository.replaceProductTools(id, data.toolIds);
+        }
+
+        return this.enrichProduct(updated);
     },
 
     async deleteProduct(id: number): Promise<boolean> {

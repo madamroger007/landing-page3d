@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import NavbarDashboard from '@/src/components/dashboard/NavbarDashboard';
-import { CategoryTable } from '@/src/components/dashboard/products';
+import { CategoryTable } from './category-table';
 import LoadingSpinner from '@/src/components/loading/loadingSpinner';
 import ErrorDisplay from '@/src/components/errors/errorDisplay';
 import { useProductContext } from '@/src/store/context/product/ProductContext';

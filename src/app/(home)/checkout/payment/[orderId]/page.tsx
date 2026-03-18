@@ -14,6 +14,7 @@ import { getMethodDetails } from "./components/payment-method-details";
 import PaymentOrderActions from "./components/payment-order-actions";
 import PaymentTopInfo from "./components/payment-top-info";
 import { buildPaymentDisplayData, extractPaymentMetaFromStatus, normalizeStatus } from "./components/payment-utils";
+import { SendEmailConfirmation } from "@/src/server/actions/email/action";
 
 export default function PaymentStatusPage() {
   const { orderId } = useParams();
@@ -56,6 +57,18 @@ export default function PaymentStatusPage() {
 
       if (!response.ok) {
         throw new Error((data.error as string) || "Failed to fetch payment status");
+      }
+
+      // send email to user about the status success or failed
+      if (data.transaction_status === "settlement") {
+        await SendEmailConfirmation({
+          email: order.customer.email,
+          name: order.customer.name,
+          order_id: order.order_id,
+          items: JSON.stringify(order.items),
+          total: order.gross_amount,
+        });
+
       }
 
       const nextStatus = normalizeStatus((data.transaction_status as string) || "pending");

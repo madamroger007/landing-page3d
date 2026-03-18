@@ -1,53 +1,235 @@
-import * as React from 'react';
-import { Item } from '../../types/type';
+import * as React from "react";
+import { Item } from "../../types/type";
+import Image from "next/image";
 
 interface EmailTemplateProps {
-    items: Item[];
-    name: string;
-    order_id: string
-    total: number;
+  items: Item[];
+  name: string;
+  order_id: string;
+  total: number;
 }
 
 export function EmailTemplate({ items, name, order_id, total }: EmailTemplateProps) {
-    return (
-        <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: '0 auto', padding: '20px', border: '1px solid #eee' }}>
-            <h2 style={{ color: '#6c47ff' }}>Thank you for your order, {name}!</h2>
-            <p>Your payment was successful and your order <strong>{order_id}</strong> is being processed.</p>
+  return (
+    <div
+      style={{
+        backgroundColor: "#f4f6fb",
+        padding: "20px",
+        fontFamily: "Arial, Helvetica, sans-serif",
+      }}
+    >
+      <table
+        width="100%"
+        cellPadding={0}
+        cellSpacing={0}
+        style={{
+          maxWidth: "600px",
+          margin: "0 auto",
+          background: "#ffffff",
+          borderRadius: "10px",
+          border: "1px solid #eaeaea",
+          overflow: "hidden",
+        }}
+      >
+        <tbody>
 
-            <table style={{ width: '100%', borderCollapse: 'collapse', margin: '20px 0' }}>
+          {/* HEADER */}
+          <tr>
+            <td
+              style={{
+                backgroundColor: "#6c47ff",
+                padding: "24px",
+                textAlign: "center",
+                color: "#ffffff",
+              }}
+            >
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  lineHeight: "42px",
+                  background: "#ffffff",
+                  color: "#6c47ff",
+                  fontWeight: "bold",
+                  borderRadius: "8px",
+                  margin: "0 auto 8px",
+                  fontSize: "20px",
+                }}
+              >
+                M
+              </div>
+
+              <h2 style={{ margin: 0, fontWeight: 600 }}>Madamspace</h2>
+            </td>
+          </tr>
+
+          {/* BODY */}
+          <tr>
+            <td style={{ padding: "30px" }}>
+              <h2 style={{ marginTop: 0 }}>Payment Successful 🎉</h2>
+
+              <p>
+                Hello <strong>{name}</strong>,
+              </p>
+
+              <p>
+                Thank you for your purchase. Your order{" "}
+                <strong>{order_id}</strong> has been successfully paid and is now
+                being processed.
+              </p>
+
+              {/* ORDER TABLE */}
+              <table
+                width="100%"
+                cellPadding={0}
+                cellSpacing={0}
+                style={{
+                  marginTop: "20px",
+                  borderCollapse: "collapse",
+                }}
+              >
                 <thead>
-                    <tr style={{ backgroundColor: '#f8f8f8' }}>
-                        <th style={{ padding: '10px', textAlign: 'left' }}>Item</th>
-                        <th style={{ padding: '10px', textAlign: 'left' }}>Qty</th>
-                        <th style={{ padding: '10px', textAlign: 'left' }}>Price</th>
-                        <th style={{ padding: '10px', textAlign: 'left' }}>Show</th>
-                    </tr>
+                  <tr style={{ backgroundColor: "#f8f9ff" }}>
+                    <th style={{ padding: "12px", textAlign: "left" }}>Item</th>
+                    <th style={{ padding: "12px", textAlign: "left" }}>Qty</th>
+                    <th style={{ padding: "12px", textAlign: "left" }}>Price</th>
+                    <th style={{ padding: "12px", textAlign: "left" }}>Preview</th>
+                  </tr>
                 </thead>
-                <tbody>
-                    {items.map((item: Item, idx: number) => (
-                        <tr key={idx}>
-                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{item.name}</td>
-                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{item.quantity}</td>
-                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{(item.price / 1000000).toFixed(2)} ETH</td>
-                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}><img src={item.image} alt={item.image} style={{ width: '50px', height: '50px' }} /></td>
-                        </tr>
-                    ))}
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colSpan={2} style={{ padding: '10px', textAlign: 'right', fontWeight: 'bold' }}>Subtotal:</td>
-                        <td style={{ padding: '10px', fontWeight: 'bold' }}>{(total / 1000000).toFixed(2)} ETH</td>
-                    </tr>
-                    <tr>
-                        <td colSpan={2} style={{ padding: '10px', textAlign: 'right', fontWeight: 'bold' }}>Total Paid:</td>
-                        <td style={{ padding: '10px', fontWeight: 'bold', color: '#6c47ff' }}>{(total / 1000000 + 0.02).toFixed(2)} ETH (incl. fee)</td>
-                    </tr>
-                </tfoot>
-            </table>
 
-            <p style={{ color: '#666', fontSize: '12px', marginTop: '30px' }}>
-                This is an automated message. Please do not reply to this email.
-            </p>
-        </div>
-    );
+                <tbody>
+                  {items.map((item: Item, idx: number) => (
+                    <tr key={idx}>
+                      <td
+                        style={{
+                          padding: "12px",
+                          borderBottom: "1px solid #eee",
+                        }}
+                      >
+                        <strong>{item.name}</strong>
+                      </td>
+
+                      <td
+                        style={{
+                          padding: "12px",
+                          borderBottom: "1px solid #eee",
+                          color: "#555",
+                        }}
+                      >
+                        {item.quantity}
+                      </td>
+
+                      <td
+                        style={{
+                          padding: "12px",
+                          borderBottom: "1px solid #eee",
+                        }}
+                      >
+                        {item.price} IDR
+                      </td>
+
+                      <td
+                        style={{
+                          padding: "12px",
+                          borderBottom: "1px solid #eee",
+                        }}
+                      >
+                        <Image
+                          src={item.image || "/placeholder.png"}
+                          alt={item.name}
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            objectFit: "cover",
+                            borderRadius: "6px",
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+
+                {/* TOTAL */}
+                <tfoot>
+                  <tr>
+                    <td
+                      colSpan={2}
+                      style={{
+                        padding: "12px",
+                        textAlign: "right",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Subtotal:
+                    </td>
+
+                    <td
+                      style={{
+                        padding: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {total} IDR
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      colSpan={2}
+                      style={{
+                        padding: "12px",
+                        textAlign: "right",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Total Paid:
+                    </td>
+
+                    <td
+                      style={{
+                        padding: "12px",
+                        fontWeight: "bold",
+                        color: "#6c47ff",
+                        fontSize: "16px",
+                      }}
+                    >
+                      {total} IDR
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+
+              {/* INFO */}
+              <p
+                style={{
+                  marginTop: "24px",
+                  fontSize: "14px",
+                  color: "#555",
+                }}
+              >
+                You will receive another email when your order is ready.
+              </p>
+            </td>
+          </tr>
+
+          {/* FOOTER */}
+          <tr>
+            <td
+              style={{
+                padding: "20px",
+                textAlign: "center",
+                fontSize: "12px",
+                color: "#888",
+                borderTop: "1px solid #eee",
+              }}
+            >
+              This is an automated message from <strong>Madamspace</strong>.  
+              Please do not reply to this email.
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  );
 }

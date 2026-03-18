@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { productService } from '@/src/server/services/products';
 import { productSchema } from '@/src/server/validations/products';
-import {  requireApiTokenRole } from '@/src/lib/auth/withAuth';
+import { requireApiTokenRole } from '@/src/lib/auth/withAuth';
 import { processAndUploadImage } from '@/src/server/utils/image-upload';
 /** GET /api/products — public, list all products */
 export async function GET() {
     try {
-        const products =  await productService.getProducts();
+        const products = await productService.getProducts();
         return NextResponse.json({ success: true, products }, { status: 200 });
-    } catch (error) {
+    } catch {
         return NextResponse.json(
             { success: false, message: 'Failed to fetch products' },
             { status: 500 }
@@ -24,6 +24,11 @@ export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
         const file = formData.get('file') as File | null;
+        const rawToolIds = formData.get('toolIds');
+        const parsedToolIds =
+            typeof rawToolIds === 'string' && rawToolIds.length > 0
+                ? (JSON.parse(rawToolIds) as number[])
+                : [];
 
         const body = {
             name: formData.get('name') as string,
@@ -32,6 +37,7 @@ export async function POST(request: NextRequest) {
             image: (formData.get('image') as string) || null,
             videoUrl: (formData.get('videoUrl') as string) || null,
             category: (formData.get('category') as string) || null,
+            toolIds: parsedToolIds,
         };
 
         // Upload image if file provided
@@ -55,6 +61,13 @@ export async function POST(request: NextRequest) {
         }
 
         const product = await productService.createProduct(validation.data);
+        if ('error' in product) {
+            return NextResponse.json(
+                { success: false, message: product.error },
+                { status: 400 }
+            );
+        }
+
         return NextResponse.json(
             { success: true, message: 'Product created successfully', product },
             { status: 201 }
