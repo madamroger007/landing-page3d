@@ -4,7 +4,7 @@
  * Repository layer for orders/transactions.
  */
 
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, inArray } from 'drizzle-orm';
 import { db } from '@/src/server/db';
 import { InsertOrder, SelectOrder, ordersTable } from '@/src/server/db/schema/orders';
 
@@ -44,6 +44,16 @@ export const ordersRepository = {
         return order;
     },
 
+    async getOrdersByOrderIds(orderIds: string[]): Promise<SelectOrder[]> {
+        if (orderIds.length === 0) return [];
+
+        return await db
+            .select()
+            .from(ordersTable)
+            .where(inArray(ordersTable.orderId, orderIds))
+            .orderBy(desc(ordersTable.createdAt));
+    },
+
     /**
      * Create a new order
      */
@@ -76,6 +86,29 @@ export const ordersRepository = {
         const [updated] = await db
             .update(ordersTable)
             .set({ orderLabel: label, updatedAt: new Date() })
+            .where(eq(ordersTable.orderId, orderId))
+            .returning();
+
+        return updated;
+    },
+
+    async updateOrderWorkflow(
+        orderId: string,
+        data: { orderLabel?: string; productLink?: string | null }
+    ): Promise<SelectOrder | undefined> {
+        const patch: Partial<InsertOrder> = { updatedAt: new Date() };
+
+        if (typeof data.orderLabel === 'string') {
+            patch.orderLabel = data.orderLabel;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(data, 'productLink')) {
+            patch.productLink = data.productLink ?? null;
+        }
+
+        const [updated] = await db
+            .update(ordersTable)
+            .set(patch)
             .where(eq(ordersTable.orderId, orderId))
             .returning();
 

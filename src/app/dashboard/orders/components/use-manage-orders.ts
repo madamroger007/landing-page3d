@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Order } from '@/src/types/type';
-import { ManageOrderFilters, OrderLabel, OrderApiResponse } from './types';
+import { ManageOrderFilters, OrderLabel, OrderApiResponse, UpdateWorkflowInput } from './types';
 import { useDashboardToast } from '@/src/components/dashboard/toast/DashboardToastProvider';
 
 export function useManageOrders() {
@@ -54,31 +54,59 @@ export function useManageOrders() {
         setCurrentPage(1);
     }, [filters.label, filters.q]);
 
-    const updateOrderLabel = useCallback(async (orderId: string, nextLabel: OrderLabel) => {
+    const updateOrderWorkflow = useCallback(async (orderId: string, payload: UpdateWorkflowInput) => {
         setBusyOrderId(orderId);
         try {
             const response = await fetch(`/api/payment/orders?order_id=${encodeURIComponent(orderId)}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderLabel: nextLabel }),
+                body: JSON.stringify(payload),
             });
 
             const data = (await response.json()) as { success?: boolean; order?: Order; error?: string };
             if (!response.ok || !data.success) {
-                throw new Error(data.error || 'Failed to update order label');
+                throw new Error(data.error || 'Failed to update order workflow');
             }
 
             setOrders((prev) =>
-                prev.map((order) => (order.orderId === orderId ? { ...order, orderLabel: nextLabel } : order))
+                prev.map((order) => {
+                    if (order.orderId !== orderId) return order;
+
+                    return {
+                        ...order,
+                        orderLabel: payload.orderLabel ?? order.orderLabel,
+                        productLink:
+                            payload.productLink !== undefined
+                                ? payload.productLink.trim() || null
+                                : order.productLink,
+                    };
+                })
             );
 
             setSelectedOrder((prev) =>
-                prev && prev.orderId === orderId ? { ...prev, orderLabel: nextLabel } : prev
+                prev && prev.orderId === orderId
+                    ? {
+                        ...prev,
+                        orderLabel: payload.orderLabel ?? prev.orderLabel,
+                        productLink:
+                            payload.productLink !== undefined
+                                ? payload.productLink.trim() || null
+                                : prev.productLink,
+                    }
+                    : prev
             );
         } finally {
             setBusyOrderId('');
         }
     }, []);
+
+    const updateOrderLabel = useCallback(async (orderId: string, nextLabel: OrderLabel) => {
+        await updateOrderWorkflow(orderId, { orderLabel: nextLabel });
+    }, [updateOrderWorkflow]);
+
+    const updateOrderProductLink = useCallback(async (orderId: string, productLink: string) => {
+        await updateOrderWorkflow(orderId, { productLink });
+    }, [updateOrderWorkflow]);
 
     const confirmSendEmail = useCallback(async () => {
         if (!sendEmailOrder) return;
@@ -177,6 +205,7 @@ export function useManageOrders() {
 
         fetchOrders,
         updateOrderLabel,
+        updateOrderProductLink,
         confirmSendEmail,
         confirmDelete,
         setCurrentPage,

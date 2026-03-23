@@ -95,6 +95,8 @@ export async function getProducts() {
         headers: {
             'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
         },
+        cache: 'no-store',
+
     });
     return response.json();
 }
@@ -105,6 +107,7 @@ export async function getProductsByCategory(category: string) {
         headers: {
             'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
         },
+        cache: 'no-store',
     });
 
     return response.json();
@@ -119,6 +122,8 @@ export async function getCategories() {
         headers: {
             'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
         },
+        next: { revalidate: 60 },
+
     });
 
     return response.json();
@@ -171,6 +176,8 @@ export async function getTools() {
         headers: {
             'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
         },
+        next: { revalidate: 60 },
+
     });
 
     return response.json();

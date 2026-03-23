@@ -8,22 +8,8 @@ import { OrdersFilterBar } from './orders-filter-bar';
 import { OrdersTable } from './orders-table';
 import { SendEmailModal } from './send-email-modal';
 import { useManageOrders } from './use-manage-orders';
+import { formatCurrency, formatDate } from '@/src/utils/format';
 
-function formatDate(dateString: string | Date | null) {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('id-ID', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    });
-}
-
-function formatCurrency(amount: number) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 export function ManageOrdersPageContent() {
     const {
@@ -46,6 +32,7 @@ export function ManageOrdersPageContent() {
         setDeleteOrderTarget,
         fetchOrders,
         updateOrderLabel,
+        updateOrderProductLink,
         confirmSendEmail,
         confirmDelete,
         setCurrentPage,
@@ -107,6 +94,7 @@ export function ManageOrdersPageContent() {
                             busyOrderId={busyOrderId}
                             onSelectOrder={setSelectedOrder}
                             onChangeLabel={updateOrderLabel}
+                            onSaveProductLink={updateOrderProductLink}
                             onOpenSendEmail={setSendEmailOrder}
                             onOpenDelete={setDeleteOrderTarget}
                             onPageChange={setCurrentPage}
@@ -121,9 +109,26 @@ export function ManageOrdersPageContent() {
                                 <div><span className="font-semibold">Order ID:</span> <span className="font-mono">{selectedOrder.orderId}</span></div>
                                 <div><span className="font-semibold">Customer:</span> {selectedOrder.customerName || '-'}</div>
                                 <div><span className="font-semibold">Email:</span> {selectedOrder.customerEmail || '-'}</div>
+                                <div><span className="font-semibold">Item:</span> {selectedOrder.items?.map((item) => item.name).join(', ') || '-'}</div>
+
                                 <div><span className="font-semibold">Amount:</span> {formatCurrency(selectedOrder.grossAmount)}</div>
                                 <div><span className="font-semibold">Transaction:</span> {(selectedOrder.transactionStatus || '-').toUpperCase()}</div>
                                 <div><span className="font-semibold">Label:</span> {(selectedOrder.orderLabel || 'progress').toUpperCase()}</div>
+                                <div>
+                                    <span className="font-semibold">Product Link:</span>{' '}
+                                    {selectedOrder.productLink ? (
+                                        <a
+                                            href={selectedOrder.productLink}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="text-blue-600 hover:underline break-all"
+                                        >
+                                            {selectedOrder.productLink}
+                                        </a>
+                                    ) : (
+                                        '-'
+                                    )}
+                                </div>
                                 <div><span className="font-semibold">Settlement:</span> {formatDate(selectedOrder.settlementTime || selectedOrder.updatedAt)}</div>
                             </div>
                         )}

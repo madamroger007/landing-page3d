@@ -10,8 +10,7 @@ import Newsletter from "./components/Newsletter";
 import Footer from "../../components/Footer";
 import BackgroundLayout from "../../components/BackgroundLayout";
 import CustomCursor from "../../components/CustomCursor";
-import { AgentProvider } from "../../components/agent/AgentContext";
-import PromptAgentPanel from "../../components/agent/PromptAgentPanel";
+import WhatsAppFloatingButton from "../../components/WhatsAppFloatingButton";
 import SectionWrapper from "../../components/SectionWrapper";
 
 export const metadata: Metadata = {
@@ -77,7 +76,7 @@ export default async function Home() {
   };
 
   return (
-    <AgentProvider>
+    <>
       <main className="min-h-screen text-white selection:bg-neon-blue selection:text-white overflow-hidden relative">
         <script
           type="application/ld+json"
@@ -92,6 +91,7 @@ export default async function Home() {
         <div className="hud-line-v left" />
         <div className="hud-line-v right" />
         <div className="scanline" />
+        <WhatsAppFloatingButton />
 
         <Navbar />
 
@@ -130,10 +130,7 @@ export default async function Home() {
         </SectionWrapper>
 
         <Footer />
-
-        {/* AI Prompt Agent UI */}
-        <PromptAgentPanel />
       </main>
-    </AgentProvider>
+    </>
   );
 }

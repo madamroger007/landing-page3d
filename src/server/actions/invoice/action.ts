@@ -27,8 +27,10 @@ export async function getInvoiceByOrderId(orderId: string) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/payment/orders?order_id=${encodeURIComponent(orderId)}`, {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${process.env.BEARER_TOKEN}`
-        }
+            'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
+        },
+        cache: 'no-store',
+        
     });
 
     return response.json();

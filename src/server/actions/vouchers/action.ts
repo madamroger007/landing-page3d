@@ -6,6 +6,7 @@ export async function fetchVouchers() {
         headers: {
             'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
         },
+        cache: 'no-store',
     });
     return response.json();
 }

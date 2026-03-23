@@ -16,3 +16,8 @@ export type UpdateLabelResult = {
     order?: Order;
     error?: string;
 };
+
+export type UpdateWorkflowInput = {
+    orderLabel?: OrderLabel;
+    productLink?: string;
+};

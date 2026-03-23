@@ -47,6 +47,20 @@ If `NEXT_PUBLIC_GOOGLE_ADSENSE_ID` is not set, AdSense script will not be loaded
 
 Note: Google Analytics tracks traffic; it does not pay ad revenue. Ad revenue comes from AdSense after your site is approved and ad units/Auto Ads are active.
 
+## WhatsApp Contact Button
+
+This project supports a floating WhatsApp contact button on the home page.
+
+1. Add your WhatsApp URL to `.env.local`:
+
+```bash
+NEXT_PUBLIC_WHATSAPP_URL=https://wa.me/6281234567890?text=Hi%20MadamSpace%2C%20I%20want%20to%20order%20your%20service
+```
+
+2. Restart the dev server.
+
+If `NEXT_PUBLIC_WHATSAPP_URL` is not set, the WhatsApp button will be hidden.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

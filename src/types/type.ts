@@ -3,6 +3,7 @@ export type Orders = {
   items: Item[],
   order_id: string,
   status: string,
+  product_link?: string,
   gross_amount: number,
   snap_token?: string,
   customer: Customer,
@@ -242,6 +243,7 @@ export interface Order {
   id: number;
   orderId: string;
   orderLabel: string;
+  productLink: string | null;
   grossAmount: number;
   snapToken: string | null;
   paymentType: string | null;

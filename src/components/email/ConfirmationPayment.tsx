@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Item } from "../../types/type";
+import { formatCurrency } from "@/src/utils/format";
 
 interface EmailTemplateProps {
   items: Item[];
@@ -8,7 +9,7 @@ interface EmailTemplateProps {
   total: number;
 }
 
-export function EmailTemplate({ items, name, order_id, total }: EmailTemplateProps) {
+export function ConfirmationPayment({ items, name, order_id, total }: EmailTemplateProps) {
   return (
     <div
       style={{
@@ -124,7 +125,7 @@ export function EmailTemplate({ items, name, order_id, total }: EmailTemplatePro
                           borderBottom: "1px solid #eee",
                         }}
                       >
-                        {item.price} IDR
+                        {formatCurrency(item.price)}
                       </td>
 
                       <td
@@ -172,7 +173,7 @@ export function EmailTemplate({ items, name, order_id, total }: EmailTemplatePro
                         fontWeight: "bold",
                       }}
                     >
-                      {total} IDR
+                      {formatCurrency(total)}
                     </td>
                   </tr>
 
@@ -196,7 +197,7 @@ export function EmailTemplate({ items, name, order_id, total }: EmailTemplatePro
                         fontSize: "16px",
                       }}
                     >
-                      {total} IDR
+                      {formatCurrency(total)}
                     </td>
                   </tr>
                 </tfoot>

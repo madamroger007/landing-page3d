@@ -12,6 +12,7 @@ type OrdersTableProps = {
     busyOrderId: string;
     onSelectOrder: (order: Order) => void;
     onChangeLabel: (orderId: string, label: OrderLabel) => Promise<void>;
+    onSaveProductLink: (orderId: string, productLink: string) => Promise<void>;
     onOpenSendEmail: (order: Order) => void;
     onOpenDelete: (order: Order) => void;
     onPageChange: (page: number) => void;
@@ -43,6 +44,7 @@ export function OrdersTable({
     busyOrderId,
     onSelectOrder,
     onChangeLabel,
+    onSaveProductLink,
     onOpenSendEmail,
     onOpenDelete,
     onPageChange,
@@ -68,6 +70,7 @@ export function OrdersTable({
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Settlement Date</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Label</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product Link</th>
                             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
@@ -100,6 +103,33 @@ export function OrdersTable({
                                                 <option value="done">done</option>
                                             </select>
                                         </div>
+                                    </td>
+                                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                                        <form
+                                            className="flex items-center gap-2"
+                                            onSubmit={async (e) => {
+                                                e.preventDefault();
+                                                const form = e.currentTarget;
+                                                const input = form.elements.namedItem('productLink') as HTMLInputElement | null;
+                                                await onSaveProductLink(order.orderId, input?.value || '');
+                                            }}
+                                        >
+                                            <input
+                                                type="url"
+                                                name="productLink"
+                                                placeholder="https://..."
+                                                disabled={rowBusy}
+                                                defaultValue={order.productLink || ''}
+                                                className="w-64 max-w-full text-xs border border-gray-300 rounded px-2 py-1 text-black"
+                                            />
+                                            <button
+                                                type="submit"
+                                                disabled={rowBusy}
+                                                className="px-2 py-1 text-xs rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                                            >
+                                                Save
+                                            </button>
+                                        </form>
                                     </td>
                                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                                         <div className="inline-flex gap-2">

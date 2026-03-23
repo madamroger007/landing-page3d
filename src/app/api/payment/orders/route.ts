@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
     }
 }
 
-/** PATCH /api/payment/orders?order_id=xxx — update order workflow label */
+/** PATCH /api/payment/orders?order_id=xxx — update order workflow fields */
 export async function PATCH(req: NextRequest) {
     const auth = await requireSession(req);
     if (auth instanceof NextResponse) return auth;
@@ -112,18 +112,51 @@ export async function PATCH(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const orderLabelRaw = typeof body.orderLabel === 'string' ? body.orderLabel : '';
-        const orderLabel = orderLabelRaw.trim().toLowerCase();
-        const allowedLabels = new Set(['progress', 'revisi', 'done']);
+        const nextWorkflow: { orderLabel?: string; productLink?: string | null } = {};
 
-        if (!allowedLabels.has(orderLabel)) {
+        if (typeof body.orderLabel === 'string') {
+            const orderLabel = body.orderLabel.trim().toLowerCase();
+            const allowedLabels = new Set(['progress', 'revisi', 'done']);
+
+            if (!allowedLabels.has(orderLabel)) {
+                return NextResponse.json(
+                    { error: 'orderLabel must be one of: progress, revisi, done' },
+                    { status: 400 }
+                );
+            }
+
+            nextWorkflow.orderLabel = orderLabel;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(body, 'productLink')) {
+            const productLinkRaw = typeof body.productLink === 'string' ? body.productLink.trim() : '';
+
+            if (!productLinkRaw) {
+                nextWorkflow.productLink = null;
+            } else {
+                try {
+                    const parsed = new URL(productLinkRaw);
+                    if (!['http:', 'https:'].includes(parsed.protocol)) {
+                        throw new Error('Invalid protocol');
+                    }
+                    nextWorkflow.productLink = productLinkRaw;
+                } catch {
+                    return NextResponse.json(
+                        { error: 'productLink must be a valid http/https URL or empty string' },
+                        { status: 400 }
+                    );
+                }
+            }
+        }
+
+        if (Object.keys(nextWorkflow).length === 0) {
             return NextResponse.json(
-                { error: 'orderLabel must be one of: progress, revisi, done' },
+                { error: 'No updatable fields provided. Use orderLabel and/or productLink' },
                 { status: 400 }
             );
         }
 
-        const updated = await ordersRepository.updateOrderLabel(orderId, orderLabel);
+        const updated = await ordersRepository.updateOrderWorkflow(orderId, nextWorkflow);
 
         if (!updated) {
             return NextResponse.json(

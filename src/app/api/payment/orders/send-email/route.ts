@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSession } from '@/src/lib/auth/withAuth';
 import { ordersRepository } from '@/src/server/repositories/orders';
-import { SendConfirmationEmail } from '@/src/server/services/email';
+import { ProgressPaymentEmail } from '@/src/server/services/email';
+import { link } from 'fs';
 
 export async function POST(req: NextRequest) {
     const auth = await requireSession(req);
@@ -31,17 +32,16 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Order has no customer email' }, { status: 400 });
         }
 
-        const { data, error } = await SendConfirmationEmail({
+        const { data, error } = await ProgressPaymentEmail({
             email: order.customerEmail,
             name: order.customerName || 'Customer',
             order_id: order.orderId,
-            items: order.items,
-            total: order.grossAmount,
+            links: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/order/${order.orderId}` || "",
         });
 
         if (error) {
             return NextResponse.json(
-                { error: 'Failed to send confirmation email', detail: error },
+                { error: 'Failed to send progress email', detail: error },
                 { status: 500 }
             );
         }

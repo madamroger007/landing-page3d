@@ -4,7 +4,6 @@ export async function fetchUsers() {
         headers: {
             'Authorization': `Bearer ${process.env.BEARER_TOKEN}`,
         },
-
     });
     return response.json();
 }
