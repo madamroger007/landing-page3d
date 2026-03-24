@@ -20,7 +20,8 @@
     "db:push": "npx drizzle-kit push",
     "db:studio": "npx drizzle-kit studio",
     "db:generate": "npx drizzle-kit generate",
-    "worker:dev": "tsx watch src/server/lib/queue/start-worker.ts"
+    "worker:dev": "tsx watch src/server/lib/queue/start-worker.ts",
+    "db:drop": "npx drizzle-kit drop"
   },
   "dependencies": {
     "@react-email/render": "^2.0.4",

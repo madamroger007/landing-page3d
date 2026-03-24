@@ -110,7 +110,7 @@ For ci.yml:
 ## Secrets And Environment
 
 - Required repository secrets (as needed by tests):
-  - DATABASE_URL_TEST
+  - POSTGRES_URL_TEST
   - JWT_SECRET
   - MIDTRANS_SERVER_KEY_TEST
   - RESEND_API_KEY_TEST

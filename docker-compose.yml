@@ -11,7 +11,7 @@ services:
       # Node environment
       - NODE_ENV=development
       # Database connection (uses Docker internal DNS)
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/landing_page3d
+      - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/landing_page3d
       # JWT secret for authentication (CHANGE IN PRODUCTION!)
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       # Resend email configuration

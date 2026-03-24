@@ -43,6 +43,13 @@
       "when": 1774019586367,
       "tag": "0005_magical_luke_cage",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774379593752,
+      "tag": "0006_dizzy_sunset_bain",
+      "breakpoints": true
     }
   ]
 }
