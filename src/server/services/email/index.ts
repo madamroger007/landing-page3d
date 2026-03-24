@@ -31,11 +31,12 @@ const ItemParse = (items: string | null | undefined): Item[] => {
 export async function SendConfirmationEmail(body: BodyProps) {
     const { items } = body;
     const parsedItems: Item[] = ItemParse(items);
+    const links = `${process.env.NEXT_PUBLIC_APP_URL}/checkout/${body.order_id}`;
     const { data, error } = await resend.emails.send({
         from: `MadamSpace <${process.env.NEXT_PUBLIC_APP_EMAIL}>`,
         to: body.email,
         subject: `Order Confirmation - ${body.order_id} is successful!`,
-        react: ConfirmationPayment({ items: parsedItems, order_id: body.order_id, name: body.name, total: body.total }),
+        react: ConfirmationPayment({ items: parsedItems, order_id: body.order_id, name: body.name, total: body.total, links }),
     });
     return { data, error };
 }
@@ -43,7 +44,7 @@ export async function SendConfirmationEmail(body: BodyProps) {
 export async function SendPaymentLinkEmail(body: BodyProps) {
     const { items } = body;
     const parsedItems: Item[] = ItemParse(items);
-    const link = `${process.env.NEXT_PUBLIC_APP_URL}/checkout/order/${body.order_id}`;
+    const link = `${process.env.NEXT_PUBLIC_APP_URL}/checkout/payment/${body.order_id}`;
     const { data, error } = await resend.emails.send({
         from: `MadamSpace <${process.env.NEXT_PUBLIC_APP_EMAIL}>`,
         to: body.email,

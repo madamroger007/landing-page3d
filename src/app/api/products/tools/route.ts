@@ -17,7 +17,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-    const auth = await requireApiTokenRole(request);
+    const auth = await requireApiTokenRole(request, 'admin');
     if (auth instanceof NextResponse) return auth;
 
     try {

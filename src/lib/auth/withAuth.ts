@@ -14,9 +14,7 @@ export interface AuthContext {
 // Used by: /api/auth/* routes (dashboard session)
 // ============================================================================
 
-export async function requireSession(
-    request: NextRequest
-): Promise<AuthContext | NextResponse> {
+export async function requireSession(): Promise<AuthContext | NextResponse> {
     const cookieStore = await cookies();
     const jwtToken = cookieStore.get('auth-token')?.value;
 
@@ -40,10 +38,9 @@ export async function requireSession(
 }
 
 export async function requireSessionRole(
-    request: NextRequest,
     role: string
 ): Promise<AuthContext | NextResponse> {
-    const result = await requireSession(request);
+    const result = await requireSession();
     if (result instanceof NextResponse) return result;
 
     if (result.role !== role) {
@@ -101,10 +98,18 @@ export async function requireApiToken(
 }
 
 export async function requireApiTokenRole(
-    request: NextRequest
+    request: NextRequest,
+    role: string
 ): Promise<AuthContext | NextResponse> {
     const result = await requireApiToken(request);
     if (result instanceof NextResponse) return result;
+
+    if (result.role !== role) {
+        return NextResponse.json(
+            { success: false, message: `Access denied. ${role} role required.` },
+            { status: 403 }
+        );
+    }
 
     return result;
 }
@@ -124,7 +129,7 @@ export async function requireAuth(
     }
 
     // 2. Fallback: cookie-based JWT session
-    return requireSession(request);
+    return requireSession();
 }
 
 export async function requireRole(

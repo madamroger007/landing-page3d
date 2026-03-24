@@ -1,6 +1,11 @@
 import { eq, gt, and } from 'drizzle-orm';
+import { createHash } from 'crypto';
 import { db } from '@/src/server/db';
 import { usersTable, InsertUser, SelectUser } from '@/src/server/db/schema/user';
+
+function hashResetToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
+}
 
 export const authRepository = {
     /**
@@ -31,12 +36,14 @@ export const authRepository = {
      * Find user by valid reset token (not expired)
      */
     async findUserByResetToken(token: string): Promise<SelectUser | undefined> {
+        const tokenHash = hashResetToken(token);
+
         const [user] = await db
             .select()
             .from(usersTable)
             .where(
                 and(
-                    eq(usersTable.resetPasswordToken, token),
+                    eq(usersTable.resetPasswordToken, tokenHash),
                     gt(usersTable.resetPasswordExpires, new Date())
                 )
             )
@@ -80,10 +87,12 @@ export const authRepository = {
         token: string,
         expires: Date
     ): Promise<SelectUser | undefined> {
+        const tokenHash = hashResetToken(token);
+
         const [user] = await db
             .update(usersTable)
             .set({
-                resetPasswordToken: token,
+                resetPasswordToken: tokenHash,
                 resetPasswordExpires: expires,
                 updatedAt: new Date(),
             })

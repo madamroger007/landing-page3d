@@ -339,7 +339,7 @@ export default function CheckoutPageClient({ midtransConfig }: CheckoutPageClien
             }
 
             clearCart();
-            router.push(`/checkout/order/${result.order_id}`);
+            router.push(`/checkout/payment/${result.order_id}`);
         }
 
         if (!result) {

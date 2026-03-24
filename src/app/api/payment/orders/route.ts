@@ -7,7 +7,7 @@ import { extractPaymentPersistenceFields } from '@/src/utils/payment';
 
 /** GET /api/payment/orders — get all orders with optional Midtrans sync */
 export async function GET(req: NextRequest) {
-    const auth = await requireSession(req);
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     const { searchParams } = new URL(req.url);
@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
 
 /** PATCH /api/payment/orders?order_id=xxx — update order workflow fields */
 export async function PATCH(req: NextRequest) {
-    const auth = await requireSession(req);
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     const { searchParams } = new URL(req.url);
@@ -177,7 +177,7 @@ export async function PATCH(req: NextRequest) {
 
 /** DELETE /api/payment/orders?order_id=xxx — delete an order */
 export async function DELETE(req: NextRequest) {
-    const auth = await requireSession(req);
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     const { searchParams } = new URL(req.url);

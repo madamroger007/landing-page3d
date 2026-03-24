@@ -21,12 +21,3 @@ export {
     CACHE_TTL,
 } from './cache';
 
-// Queue utilities
-export { emailQueue } from './queue';
-export type {
-    EmailJob,
-    EmailJobType,
-    PaymentConfirmationJob,
-    PaymentLinkJob,
-    ForgotPasswordJob,
-} from './queue';

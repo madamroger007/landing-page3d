@@ -1,4 +1,5 @@
 import { Item } from "@/src/types/type";
+import Image from "next/image";
 
 export default async function DirectPayment(params: {
   link: string;
@@ -133,8 +134,10 @@ export default async function DirectPayment(params: {
                     <tbody>
                       <tr>
                         <td width="90">
-                          <img
-                            src={item.image}
+                          <Image
+                            width={80}
+                            height={80}
+                            src={item.image || "/placeholder.png"}
                             alt={item.name}
                             style={{
                               width: "80px",
@@ -216,7 +219,7 @@ export default async function DirectPayment(params: {
 
               {/* FALLBACK LINK */}
               <p style={{ fontSize: "13px", color: "#666" }}>
-                If the button doesn't work, copy and paste this link into your
+                If the button doesn&apos;t work, copy and paste this link into your
                 browser:
               </p>
 

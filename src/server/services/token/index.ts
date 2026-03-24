@@ -34,7 +34,8 @@ export const tokenService = {
             expiresAt: expiresAt ?? null,
         });
 
-        const { tokenHash: _h, ...view } = created;
+        const { tokenHash: hiddenHash, ...view } = created;
+        void hiddenHash;
         return { raw, token: view };
     },
 
@@ -80,7 +81,11 @@ export const tokenService = {
      */
     async listTokens(userId: string): Promise<TokenView[]> {
         const tokens = await tokenRepository.findByUserId(userId);
-        return tokens.map(({ tokenHash: _h, ...view }) => view);
+        return tokens.map((token) => {
+            const { tokenHash: hiddenHash, ...view } = token;
+            void hiddenHash;
+            return view;
+        });
     },
 };
 

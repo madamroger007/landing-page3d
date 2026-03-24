@@ -6,11 +6,20 @@ import { requireSessionRole } from '@/src/lib/auth/withAuth';
 import { SelectUser } from '@/src/server/db/schema/user';
 
 function sanitizeUsers(users: SelectUser[]) {
-    return users.map(({ password: _p, resetPasswordToken: _r, resetPasswordExpires: _e, ...rest }) => rest);
+    return users.map((user) => {
+        const { password, resetPasswordToken, resetPasswordExpires, ...rest } = user;
+        void password;
+        void resetPasswordToken;
+        void resetPasswordExpires;
+        return rest;
+    });
 }
 
 /** GET /api/auth/users — admin only (requires cookie session) */
 export async function GET() {
+    const auth = await requireSessionRole('admin');
+    if (auth instanceof NextResponse) return auth;
+
     try {
         const users = await authRepository.getUsers();
         return NextResponse.json({ success: true, users: sanitizeUsers(users) });
@@ -22,7 +31,7 @@ export async function GET() {
 
 /** POST /api/auth/users — admin only (requires cookie session) */
 export async function POST(request: NextRequest) {
-    const auth = await requireSessionRole(request, 'admin');
+    const auth = await requireSessionRole('admin');
     if (auth instanceof NextResponse) return auth;
 
     try {

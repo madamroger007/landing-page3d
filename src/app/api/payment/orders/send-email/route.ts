@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireSession } from '@/src/lib/auth/withAuth';
 import { ordersRepository } from '@/src/server/repositories/orders';
 import { ProgressPaymentEmail } from '@/src/server/services/email';
-import { link } from 'fs';
 
 export async function POST(req: NextRequest) {
-    const auth = await requireSession(req);
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     try {
@@ -36,7 +35,7 @@ export async function POST(req: NextRequest) {
             email: order.customerEmail,
             name: order.customerName || 'Customer',
             order_id: order.orderId,
-            links: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/order/${order.orderId}` || "",
+            links: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/${order.orderId}` || "",
         });
 
         if (error) {

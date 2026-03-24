@@ -7,7 +7,7 @@ import { ArrowLeft, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import CustomCursor from "@/src/components/CustomCursor";
 import { Orders } from "@/src/types/type";
-import { formatIDR, formatMoneyFromIdr, resolveUserLocaleCurrency } from "@/src/utils/utils";
+import { formatMoneyFromIdr, resolveUserLocaleCurrency } from "@/src/utils/utils";
 import PaymentInstructionsPanel from "./components/payment-instructions-panel";
 import PaymentLoadingState from "./components/payment-loading-state";
 import { getMethodDetails } from "./components/payment-method-details";
@@ -149,7 +149,6 @@ export default function PaymentStatusPage() {
               <h1 className="text-5xl md:text-6xl font-syne font-bold text-transparent bg-clip-text bg-linear-to-r from-neon-blue to-purple-400">
                 {formatMoneyFromIdr(order.gross_amount, { locale, currency })}
               </h1>
-              <p className="text-xs text-white/40 mt-2">Charged in IDR: {formatIDR(order.gross_amount)}</p>
             </div>
 
             <div className="max-w-xs mx-auto space-y-4">
@@ -158,12 +157,12 @@ export default function PaymentStatusPage() {
                 instructions={methodDetails.instructions}
                 displayData={displayData}
                 store={order.store}
+                copied={copied}
+                onCopy={() => copyToClipboard(order.va_numbers?.[0]?.va_number || "")}
               />
 
               <PaymentOrderActions
                 orderId={order.order_id}
-                copied={copied}
-                onCopy={() => copyToClipboard(order.order_id)}
                 isSuccess={isSuccess}
                 checkingStatus={checkingStatus}
                 onCheckStatus={handleCheckPaymentStatus}

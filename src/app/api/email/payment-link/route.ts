@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const { email, name, order_id, total, items } = await req.json();
-        const link = `${process.env.NEXT_PUBLIC_APP_URL}/checkout/order/${order_id}`;
+        const link = `${process.env.NEXT_PUBLIC_APP_URL}/checkout/payment/${order_id}`;
         const body = { email, name, order_id, total, items, link };
         const { data, error } = await SendPaymentLinkEmail(body);
 

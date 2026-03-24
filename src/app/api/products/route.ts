@@ -18,7 +18,7 @@ export async function GET() {
 
 /** POST /api/products — admin only, create product with optional image upload */
 export async function POST(request: NextRequest) {
-    const auth = await requireApiTokenRole(request);
+    const auth = await requireApiTokenRole(request, 'admin');
     if (auth instanceof NextResponse) return auth;
 
     try {

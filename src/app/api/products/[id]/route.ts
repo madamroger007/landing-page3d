@@ -33,7 +33,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 /** PATCH /api/products/[id] — admin only, update product with optional image upload */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
-    const auth = await requireApiTokenRole(request);
+    const auth = await requireApiTokenRole(request, 'admin');
     if (auth instanceof NextResponse) return auth;
 
     try {
@@ -106,7 +106,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 /** DELETE /api/products/[id] — admin only (Bearer token), delete product */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
-    const auth = await requireApiTokenRole(request);
+    const auth = await requireApiTokenRole(request, 'admin');
     if (auth instanceof NextResponse) return auth;
 
     try {

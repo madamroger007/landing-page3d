@@ -7,9 +7,10 @@ interface EmailTemplateProps {
   name: string;
   order_id: string;
   total: number;
+  links?: string;
 }
 
-export function ConfirmationPayment({ items, name, order_id, total }: EmailTemplateProps) {
+export function ConfirmationPayment({ items, name, order_id, total, links }: EmailTemplateProps) {
   return (
     <div
       style={{
@@ -77,6 +78,10 @@ export function ConfirmationPayment({ items, name, order_id, total }: EmailTempl
                 <strong>{order_id}</strong> has been successfully paid and is now
                 being processed.
               </p>
+
+              <a href={links} style={{ color: "#6c47ff", textDecoration: "underline", fontSize: "14px", fontWeight: "bold" }}>
+                View Your Order Here
+              </a>
 
               {/* ORDER TABLE */}
               <table

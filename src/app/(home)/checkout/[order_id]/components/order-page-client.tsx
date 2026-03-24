@@ -29,7 +29,7 @@ export default function OrderPageClient({ orderId }: { orderId: string }) {
                 <CheckoutOrderHeader
                     eyebrow="Order Detail"
                     title={order.order_id}
-                    backHref="/checkout/order"
+                    backHref="/checkout/"
                     backLabel="Back"
                     titleClassName="text-2xl md:text-3xl font-mono font-bold"
                 />

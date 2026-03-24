@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MidtransTransaction } from "@/src/types/type";
 import { createPaymentService, createPaymentWithCoreApi } from "@/src/server/services/payment";
+import { ordersRepository } from "@/src/server/repositories/orders";
+import { buildRateLimitHeaders, checkRateLimit, getRequestIp } from "@/src/server/lib/rateLimit";
+
+const ORDER_ID_PATTERN = /^[A-Za-z0-9._-]{8,64}$/;
 
 function resolvePersistedGrossAmount(
     requestedGrossAmount: number,
@@ -19,8 +23,50 @@ function resolvePersistedGrossAmount(
 /** POST /api/payment/create-transaction — Core API charge flow */
 export async function POST(req: NextRequest) {
     try {
-        const body: MidtransTransaction = await req.json();
+        const ip = getRequestIp(req);
+        const rateLimit = await checkRateLimit(`payment:create-transaction:${ip}`, 20, 60);
+
+        if (!rateLimit.allowed) {
+            return NextResponse.json(
+                { error: 'Too many requests. Please try again later.' },
+                { status: 429, headers: buildRateLimitHeaders(rateLimit) }
+            );
+        }
+
+        const contentType = req.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+            return NextResponse.json(
+                { error: 'Unsupported content type. Use application/json.' },
+                { status: 415 }
+            );
+        }
+
+        const rawBody = (await req.json()) as MidtransTransaction & { website?: string };
+        if (typeof rawBody.website === 'string' && rawBody.website.trim().length > 0) {
+            return NextResponse.json({ error: 'Invalid request payload' }, { status: 400 });
+        }
+
+        const body: MidtransTransaction = rawBody;
         const { order_id, items, customer } = body;
+
+        if (!ORDER_ID_PATTERN.test(order_id)) {
+            return NextResponse.json(
+                { error: 'Invalid order_id format' },
+                { status: 400 }
+            );
+        }
+
+        const existingOrder = await ordersRepository.getOrderByOrderId(order_id);
+        if (existingOrder) {
+            return NextResponse.json(
+                {
+                    error: 'Order already exists',
+                    order_id: existingOrder.orderId,
+                    status: existingOrder.transactionStatus,
+                },
+                { status: 409 }
+            );
+        }
 
         const paymentResult = await createPaymentWithCoreApi(body);
         const persistedGrossAmount = resolvePersistedGrossAmount(

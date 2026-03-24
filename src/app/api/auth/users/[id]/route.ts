@@ -9,16 +9,32 @@ interface RouteParams {
 
 function sanitizeUser(user: Awaited<ReturnType<typeof authRepository.findUserById>>) {
     if (!user) return null;
-    const { password: _p, resetPasswordToken: _r, resetPasswordExpires: _e, ...safe } = user;
+    const {
+        password,
+        resetPasswordToken,
+        resetPasswordExpires,
+        ...safe
+    } = user;
+    void password;
+    void resetPasswordToken;
+    void resetPasswordExpires;
     return safe;
 }
 
 /** GET /api/auth/users/[id] — authenticated (requires cookie session) */
 export async function GET(request: NextRequest, { params }: RouteParams) {
-    const auth = await requireSession(request);
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await params;
+
+    if (auth.role !== 'admin' && auth.userId !== id) {
+        return NextResponse.json(
+            { success: false, message: 'Access denied. You can only access your own profile.' },
+            { status: 403 }
+        );
+    }
+
     const user = await authRepository.findUserById(id);
 
     if (!user) {
@@ -30,7 +46,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 /** PATCH /api/auth/users/[id] — admin only (requires cookie session) */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
-    const auth = await requireSessionRole(request, 'admin');
+    const auth = await requireSessionRole('admin');
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await params;
@@ -54,7 +70,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 /** DELETE /api/auth/users/[id] — admin only, cannot self-delete (requires cookie session) */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
-    const auth = await requireSessionRole(request, 'admin');
+    const auth = await requireSessionRole('admin');
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await params;

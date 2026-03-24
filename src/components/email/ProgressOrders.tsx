@@ -108,7 +108,7 @@ export default function ProgressOrders({
                                         >
                                             M
                                         </div>
-                                        <h2 style={{ margin: 0 }}>Madamspace</h2>
+                                        <h2 style={{ margin: 0, color: "#ffffff" }}>Madamspace</h2>
                                     </td>
                                 </tr>
 

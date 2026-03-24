@@ -4,7 +4,9 @@ import { requireSession } from '@/src/lib/auth/withAuth';
 
 /** GET /api/auth/me — requires cookie session (dashboard) */
 export async function GET(request: NextRequest) {
-    const auth = await requireSession(request);
+    void request;
+
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     try {

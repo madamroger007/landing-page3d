@@ -8,7 +8,7 @@ interface RouteParams {
 
 /** DELETE /api/auth/token/[id] — revoke a single token by ID (requires cookie session) */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
-    const auth = await requireSession(request);
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await params;

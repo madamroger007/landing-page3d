@@ -4,9 +4,13 @@ import { randomBytes } from 'crypto';
 import { authRepository } from '@/src/server/repositories/auth';
 import { InsertUser, SelectUser } from '@/src/server/db/schema/user';
 
-const JWT_SECRET = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'your-secret-key-change-in-production'
-);
+const jwtSecret = process.env.JWT_SECRET;
+
+if (!jwtSecret) {
+    throw new Error('Missing JWT_SECRET environment variable. Refusing to start with an insecure JWT configuration.');
+}
+
+const JWT_SECRET = new TextEncoder().encode(jwtSecret);
 const TOKEN_EXPIRY = '7d';
 const RESET_TOKEN_EXPIRY_HOURS = 1;
 
@@ -27,7 +31,15 @@ export interface TokenPayload {
  * Sanitize user object - remove sensitive fields
  */
 function sanitizeUser(user: SelectUser) {
-    const { password: _password, resetPasswordToken: _resetPasswordToken, resetPasswordExpires: _resetPasswordExpires, ...sanitized } = user;
+    const {
+        password,
+        resetPasswordToken,
+        resetPasswordExpires,
+        ...sanitized
+    } = user;
+    void password;
+    void resetPasswordToken;
+    void resetPasswordExpires;
     return sanitized;
 }
 

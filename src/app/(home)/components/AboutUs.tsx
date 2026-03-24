@@ -21,7 +21,7 @@ export default function AboutUs() {
                     className="text-center lg:text-left order-1 lg:order-2"
                 >
                     <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-syne font-bold mb-6 md:mb-10 leading-tight">
-                        What's Our Company?
+                        What&apos;s Our Company?
                     </h2>
 
                     <div className="space-y-4 md:space-y-6 mb-8 md:mb-12">

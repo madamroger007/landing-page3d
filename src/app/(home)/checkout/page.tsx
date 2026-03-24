@@ -6,7 +6,7 @@ type MidtransClientConfig = {
 };
 
 function getMidtransClientConfig(): MidtransClientConfig | null {
-  const clientKey = process.env.MIDTRANS_CLIENT_KEY;
+  const clientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
 
   if (!clientKey) {
     return null;

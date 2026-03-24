@@ -6,8 +6,8 @@ import {
 } from "@/src/server/services/paymentFeeConfig";
 import { paymentFeeConfigSchema } from "@/src/server/validations/paymentFeeConfig";
 
-export async function GET(request: NextRequest) {
-    const auth = await requireSessionRole(request, "admin");
+export async function GET() {
+    const auth = await requireSessionRole("admin");
     if (auth instanceof NextResponse) return auth;
 
     try {
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-    const auth = await requireSessionRole(request, "admin");
+    const auth = await requireSessionRole("admin");
     if (auth instanceof NextResponse) return auth;
 
     try {

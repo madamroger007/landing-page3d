@@ -31,7 +31,7 @@ export default function OrderSummaryCard({ order, dbOrder }: OrderSummaryCardPro
             </p>
 
             <div className="text-sm text-white/80">
-                <p className="font-semibold mb-1">Doing Product Link</p>
+                <p className="font-semibold mb-1">Link to your product order</p>
                 {dbOrder?.productLink ? (
                     <a
                         href={dbOrder.productLink}

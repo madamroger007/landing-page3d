@@ -18,7 +18,7 @@ export async function GET() {
 
 /** POST /api/voucher — admin only (requires Bearer token) */
 export async function POST(request: NextRequest) {
-    const auth = await requireApiTokenRole(request);
+    const auth = await requireApiTokenRole(request, 'admin');
     if (auth instanceof NextResponse) return auth;
 
     try {

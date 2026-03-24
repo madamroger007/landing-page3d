@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { Check, CheckCircle2, Copy, RefreshCcw } from "lucide-react";
+import { CheckCircle2, RefreshCcw } from "lucide-react";
 
 type PaymentOrderActionsProps = {
     orderId: string;
-    copied: boolean;
-    onCopy: () => void;
     isSuccess: boolean;
     checkingStatus: boolean;
     onCheckStatus: () => void;
@@ -13,8 +11,6 @@ type PaymentOrderActionsProps = {
 
 export default function PaymentOrderActions({
     orderId,
-    copied,
-    onCopy,
     isSuccess,
     checkingStatus,
     onCheckStatus,
@@ -27,9 +23,6 @@ export default function PaymentOrderActions({
                     <p className="text-[10px] text-left text-white/30 uppercase font-black mb-1">Invoice Number</p>
                     <p className="text-xs font-mono text-white/60">{orderId}</p>
                 </div>
-                <button onClick={onCopy} className="p-2.5 rounded-xl hover:bg-white/10 transition-colors">
-                    {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-white/30" />}
-                </button>
             </div>
 
             {!isSuccess && (

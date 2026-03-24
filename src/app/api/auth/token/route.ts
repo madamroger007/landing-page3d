@@ -4,7 +4,9 @@ import { requireSession } from '@/src/lib/auth/withAuth';
 
 /** GET /api/auth/token — list own tokens (requires cookie session) */
 export async function GET(request: NextRequest) {
-    const auth = await requireSession(request);
+    void request;
+
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     const tokens = await tokenService.listTokens(auth.userId);
@@ -13,7 +15,7 @@ export async function GET(request: NextRequest) {
 
 /** POST /api/auth/token — generate a new API token (requires cookie session) */
 export async function POST(request: NextRequest) {
-    const auth = await requireSession(request);
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     try {
@@ -50,7 +52,9 @@ export async function POST(request: NextRequest) {
 
 /** DELETE /api/auth/token — revoke ALL own tokens (requires cookie session) */
 export async function DELETE(request: NextRequest) {
-    const auth = await requireSession(request);
+    void request;
+
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     await tokenService.revokeAllTokens(auth.userId);

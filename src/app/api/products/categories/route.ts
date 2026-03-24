@@ -19,7 +19,7 @@ export async function GET() {
 
 /** POST /api/products/categories — admin only (Bearer token), create category */
 export async function POST(request: NextRequest) {
-    const auth = await requireApiTokenRole(request);
+    const auth = await requireApiTokenRole(request, 'admin');
     if (auth instanceof NextResponse) return auth;
 
     try {
