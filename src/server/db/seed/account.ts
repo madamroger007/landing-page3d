@@ -3,21 +3,13 @@ import { authService } from "../../services/auth";
 async function seed() {
     const dummyAccounts = [
         {
-            email: "admin111@example.com",
+            email: process.env.ADMIN_EMAIL || "admin@example.com",
             name: "admin",
-            password: "hashed_password_here", // Should be properly hashed in production
+            password: process.env.ADMIN_PASSWORD || "password", // Should be properly hashed in production
             role: "admin",
             createdAt: new Date(),
             updatedAt: new Date(),
-        },
-        {
-            email: "user111@example.com",
-            name: "user",
-            password: "hashed_password_here",
-            role: "user",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        },
+        }
     ];
     try {
         for (const account of dummyAccounts) {
