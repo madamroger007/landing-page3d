@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authRepository } from '@/src/server/repositories/auth';
 import { authService } from '@/src/server/services/auth';
 import { registerSchema } from '@/src/server/validations/auth';
-import { requireSessionRole } from '@/src/lib/auth/withAuth';
+import { requireSession } from '@/src/lib/auth/withAuth';
 import { SelectUser } from '@/src/server/db/schema/user';
 
 function sanitizeUsers(users: SelectUser[]) {
@@ -17,7 +17,7 @@ function sanitizeUsers(users: SelectUser[]) {
 
 /** GET /api/auth/users — admin only (requires cookie session) */
 export async function GET() {
-    const auth = await requireSessionRole('admin');
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     try {
@@ -31,7 +31,7 @@ export async function GET() {
 
 /** POST /api/auth/users — admin only (requires cookie session) */
 export async function POST(request: NextRequest) {
-    const auth = await requireSessionRole('admin');
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     try {

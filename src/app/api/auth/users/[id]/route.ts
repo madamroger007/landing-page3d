@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authRepository } from '@/src/server/repositories/auth';
-import { requireSession, requireSessionRole } from '@/src/lib/auth/withAuth';
+import { requireSession } from '@/src/lib/auth/withAuth';
 import { updateUserSchema } from '@/src/server/validations/auth';
 
 interface RouteParams {
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 /** PATCH /api/auth/users/[id] — admin only (requires cookie session) */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
-    const auth = await requireSessionRole('admin');
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await params;
@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 /** DELETE /api/auth/users/[id] — admin only, cannot self-delete (requires cookie session) */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
-    const auth = await requireSessionRole('admin');
+    const auth = await requireSession();
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await params;

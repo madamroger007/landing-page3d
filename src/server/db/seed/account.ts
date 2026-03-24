@@ -1,4 +1,5 @@
 import { authService } from "../../services/auth";
+import { tokenService } from "../../services/token";
 
 async function seed() {
     const dummyAccounts = [
@@ -13,7 +14,8 @@ async function seed() {
     ];
     try {
         for (const account of dummyAccounts) {
-            await authService.registerUser(account);
+            const result = await authService.registerUser(account);
+            await tokenService.generateToken(result.user?.id || "", "Admin Token", undefined);
         }
     } catch (error) {
         console.error("Error seeding accounts:", error);

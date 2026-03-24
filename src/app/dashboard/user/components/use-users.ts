@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import { User, UserFormData, UserFormError } from './types';
-import { fetchUsers } from '@/src/server/actions/users/action';
 import { useDashboardToast } from '@/src/components/dashboard/toast/DashboardToastProvider';
 
 export function useUsers() {
@@ -28,8 +27,8 @@ export function useUsers() {
 
     const getUsers = useCallback(async () => {
         try {
-            const response = await fetchUsers();
-            console.log('fetchUsers response:', response);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/users`, { method: 'GET' }).then((res) => res.json());
+
             setUsers(response.users || []);
         } catch {
             setError('An unexpected error occurred');
@@ -97,7 +96,7 @@ export function useUsers() {
             }
 
             handleCloseModal();
-            fetchUsers();
+
         } catch {
             setFormError({ formErrors: ['An unexpected error occurred'], fieldErrors: {} });
         } finally {
@@ -120,7 +119,6 @@ export function useUsers() {
             showToast('User deleted successfully', 'success', {
                 onClose: () => window.location.reload(),
             });
-            fetchUsers();
         } catch {
             alert('An unexpected error occurred');
         }
