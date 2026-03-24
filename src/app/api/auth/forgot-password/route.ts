@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/src/server/services/auth';
 import { forgotPasswordSchema } from '@/src/server/validations/auth';
 import { Resend } from 'resend';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -58,7 +59,8 @@ export async function POST(request: NextRequest) {
             message: 'If an account exists with this email, you will receive a password reset link.',
         });
     } catch (error) {
-        console.error('Forgot password error:', error);
+        console.error('Error in forgot-password route:', error);
+        await reportErrorToSlack(error, { source: "api.forgot-password" });
         return NextResponse.json(
             { success: false, message: 'Internal server error' },
             { status: 500 }

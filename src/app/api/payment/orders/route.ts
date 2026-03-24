@@ -4,6 +4,7 @@ import { ordersRepository } from '@/src/server/repositories/orders';
 import { MidtransTransactionResponse } from '@/src/types/type';
 import { midtransProvider } from '@/src/server/providers/midtransProvider';
 import { extractPaymentPersistenceFields } from '@/src/utils/payment';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 /** GET /api/payment/orders — get all orders with optional Midtrans sync */
 export async function GET(req: NextRequest) {
@@ -50,6 +51,7 @@ export async function GET(req: NextRequest) {
                         });
                     } catch (err) {
                         console.error(`[orders-sync] Failed to sync ${order.orderId}:`, err);
+                        await reportErrorToSlack(err, { source: 'orders-sync', route: '/api/payment/orders', method: 'GET' });
                     }
                 })
             );
@@ -88,6 +90,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ orders: ordersWithItems });
     } catch (err) {
         console.error('[orders]', err);
+        await reportErrorToSlack(err, { source: 'orders', route: '/api/payment/orders', method: 'GET' });
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -168,6 +171,7 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ success: true, order: updated });
     } catch (err) {
         console.error('[orders-patch]', err);
+        await reportErrorToSlack(err, { source: 'orders-patch', route: '/api/payment/orders', method: 'PATCH' });
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -203,6 +207,7 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ success: true });
     } catch (err) {
         console.error('[orders-delete]', err);
+        await reportErrorToSlack(err, { source: 'orders-delete', route: '/api/payment/orders', method: 'DELETE' });
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

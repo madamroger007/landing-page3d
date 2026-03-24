@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { productService } from '@/src/server/services/products';
 import { categorySchema } from '@/src/server/validations/products';
 import { requireApiTokenRole } from '@/src/lib/auth/withAuth';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 /** GET /api/products/categories — public, list all categories */
 export async function GET() {
@@ -10,6 +11,7 @@ export async function GET() {
         return NextResponse.json({ success: true, categories:categories }, { status: 200 });
     } catch (error) {
         console.error('Get categories error:', error);
+        await reportErrorToSlack(error, { source: 'get-categories', route: '/api/products/categories', method: 'GET' });
         return NextResponse.json(
             { success: false, message: 'Failed to fetch categories' },
             { status: 500 }
@@ -48,6 +50,7 @@ export async function POST(request: NextRequest) {
         );
     } catch (error) {
         console.error('Create category error:', error);
+        await reportErrorToSlack(error, { source: 'create-category', route: '/api/products/categories', method: 'POST' });
         return NextResponse.json(
             { success: false, message: 'Failed to create category' },
             { status: 500 }

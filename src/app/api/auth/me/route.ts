@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/src/server/services/auth';
 import { requireSession } from '@/src/lib/auth/withAuth';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 /** GET /api/auth/me — requires cookie session (dashboard) */
 export async function GET(request: NextRequest) {
@@ -18,7 +19,8 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ success: true, user: result.user });
     } catch (error) {
-        console.error('Get current user error:', error);
+        console.error('Error in me route:', error);
+        await reportErrorToSlack(error, { source: "api.me" });
         return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
     }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireSession } from '@/src/lib/auth/withAuth';
 import { ordersRepository } from '@/src/server/repositories/orders';
 import { ProgressPaymentEmail } from '@/src/server/services/email';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 export async function POST(req: NextRequest) {
     const auth = await requireSession();
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, data });
     } catch (error) {
         console.error('[orders-send-email]', error);
+        await reportErrorToSlack(error, { source: 'orders-send-email', route: '/api/payment/orders/send-email', method: 'POST' });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

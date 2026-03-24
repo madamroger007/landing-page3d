@@ -5,6 +5,7 @@ import {
     updatePaymentFeeConfigService,
 } from "@/src/server/services/paymentFeeConfig";
 import { paymentFeeConfigSchema } from "@/src/server/validations/paymentFeeConfig";
+import { reportErrorToSlack } from "@/src/server/lib/slack-error-reporter";
 
 export async function GET() {
     const auth = await requireSessionRole("admin");
@@ -15,6 +16,7 @@ export async function GET() {
         return NextResponse.json({ success: true, data }, { status: 200 });
     } catch (error) {
         console.error("[payment-fee-config:get]", error);
+        await reportErrorToSlack(error, { source: 'payment-fee-config', route: '/api/payment/fee-config', method: 'GET' });
         return NextResponse.json(
             { success: false, message: "Failed to fetch payment fee config" },
             { status: 500 }
@@ -45,6 +47,7 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ success: true, data }, { status: 200 });
     } catch (error) {
         console.error("[payment-fee-config:update]", error);
+        await reportErrorToSlack(error, { source: 'payment-fee-config', route: '/api/payment/fee-config', method: 'PATCH' });
         return NextResponse.json(
             { success: false, message: "Failed to update payment fee config" },
             { status: 500 }

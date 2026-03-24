@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { authService } from '@/src/server/services/auth';
 import { loginSchema } from '@/src/server/validations/auth';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 export async function POST(request: NextRequest) {
     try {
@@ -42,7 +43,8 @@ export async function POST(request: NextRequest) {
             user: result.user,
         });
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('Error in login route:', error);
+        await reportErrorToSlack(error, { source: "api.login" });
         return NextResponse.json(
             { success: false, message: 'Internal server error' },
             { status: 500 }

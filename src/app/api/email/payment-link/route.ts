@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireApiToken } from '@/src/lib/auth/withAuth';
 import { SendPaymentLinkEmail } from '@/src/server/services/email';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 /** POST /api/email/payment-link — requires Bearer token */
 export async function POST(req: NextRequest) {
@@ -19,7 +20,8 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true, data });
     } catch (error) {
-        console.error('Send payment link error:', error);
+        console.error('Error in payment-link-email route:', error);
+        await reportErrorToSlack(error, { source: 'payment-link-email', route: '/api/email/payment-link', method: 'POST' });
         return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
     }
 }

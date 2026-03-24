@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireSession } from '@/src/lib/auth/withAuth';
 import { midtransProvider } from '@/src/server/providers/midtransProvider';
 import { buildRateLimitHeaders, checkRateLimit, getRequestIp } from '@/src/server/lib/rateLimit';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 const ORDER_ID_PATTERN = /^[A-Za-z0-9._-]{8,64}$/;
 
@@ -40,6 +41,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json(data);
     } catch (err) {
         console.error('[transaction-status]', err);
+        await reportErrorToSlack(err, { source: 'transaction-status', route: '/api/payment/transaction-status', method: 'GET' });
         return NextResponse.json(
             { error: err instanceof Error ? err.message : 'Internal server error' },
             { status: 500 }
@@ -75,6 +77,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ transactions: results });
     } catch (err) {
         console.error('[transaction-status-batch]', err);
+        await reportErrorToSlack(err, { source: 'transaction-status-batch', route: '/api/payment/transaction-status', method: 'POST' });
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

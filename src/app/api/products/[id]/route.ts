@@ -3,6 +3,7 @@ import { productService } from '@/src/server/services/products';
 import { updateProductSchema } from '@/src/server/validations/products';
 import { requireApiTokenRole } from '@/src/lib/auth/withAuth';
 import { replaceImage } from '@/src/server/utils/image-upload';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 interface RouteParams {
     params: Promise<{ id: string }>;
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         return NextResponse.json({ success: true, product }, { status: 200 });
     } catch (error) {
         console.error('Get product error:', error);
+        await reportErrorToSlack(error, { source: 'get-product', route: '/api/products/[id]', method: 'GET' });
         return NextResponse.json(
             { success: false, message: 'Failed to fetch product' },
             { status: 500 }
@@ -97,6 +99,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         );
     } catch (error) {
         console.error('Update product error:', error);
+        await reportErrorToSlack(error, { source: 'update-product', route: '/api/products/[id]', method: 'PATCH' });
         return NextResponse.json(
             { success: false, message: 'Failed to update product' },
             { status: 500 }
@@ -126,6 +129,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         );
     } catch (error) {
         console.error('Delete product error:', error);
+        await reportErrorToSlack(error, { source: 'delete-product', route: '/api/products/[id]', method: 'DELETE' });
         return NextResponse.json(
             { success: false, message: 'Failed to delete product' },
             { status: 500 }

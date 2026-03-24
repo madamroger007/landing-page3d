@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { tokenService } from '@/src/server/services/token';
 import { requireSession } from '@/src/lib/auth/withAuth';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 /** GET /api/auth/token — list own tokens (requires cookie session) */
 export async function GET(request: NextRequest) {
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
             { status: 201 }
         );
     } catch (error) {
-        console.error('Generate token error:', error);
+        await reportErrorToSlack(error, { source: "api.token.post" });
         return NextResponse.json(
             { success: false, message: 'Internal server error' },
             { status: 500 }
@@ -52,11 +53,20 @@ export async function POST(request: NextRequest) {
 
 /** DELETE /api/auth/token — revoke ALL own tokens (requires cookie session) */
 export async function DELETE(request: NextRequest) {
-    void request;
+    try {
+        void request;
 
-    const auth = await requireSession();
-    if (auth instanceof NextResponse) return auth;
+        const auth = await requireSession();
+        if (auth instanceof NextResponse) return auth;
 
-    await tokenService.revokeAllTokens(auth.userId);
-    return NextResponse.json({ success: true, message: 'All tokens revoked' });
+        await tokenService.revokeAllTokens(auth.userId);
+        return NextResponse.json({ success: true, message: 'All tokens revoked' });
+    } catch (error) {
+        console.error('Error in token delete route:', error);
+        await reportErrorToSlack(error, { source: "api.token.delete" });
+        return NextResponse.json(
+            { success: false, message: 'Internal server error' },
+            { status: 500 }
+        );
+    }
 }

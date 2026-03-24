@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireApiTokenRole } from '@/src/lib/auth/withAuth';
 import { toolSchema } from '@/src/server/validations/tools';
 import { toolService } from '@/src/server/services/tools';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 export async function GET() {
     try {
@@ -9,6 +10,7 @@ export async function GET() {
         return NextResponse.json({ success: true, tools }, { status: 200 });
     } catch (error) {
         console.error('Get tools error:', error);
+        await reportErrorToSlack(error, { source: 'get-tools', route: '/api/products/tools', method: 'GET' });
         return NextResponse.json(
             { success: false, message: 'Failed to fetch tools' },
             { status: 500 }
@@ -45,6 +47,7 @@ export async function POST(request: NextRequest) {
         );
     } catch (error) {
         console.error('Create tool error:', error);
+        await reportErrorToSlack(error, { source: 'create-tool', route: '/api/products/tools', method: 'POST' });
         return NextResponse.json(
             { success: false, message: 'Failed to create tool' },
             { status: 500 }

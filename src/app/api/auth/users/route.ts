@@ -4,6 +4,7 @@ import { authService } from '@/src/server/services/auth';
 import { registerSchema } from '@/src/server/validations/auth';
 import { requireSession } from '@/src/lib/auth/withAuth';
 import { SelectUser } from '@/src/server/db/schema/user';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 function sanitizeUsers(users: SelectUser[]) {
     return users.map((user) => {
@@ -24,7 +25,8 @@ export async function GET() {
         const users = await authRepository.getUsers();
         return NextResponse.json({ success: true, users: sanitizeUsers(users) });
     } catch (error) {
-        console.error('Get users error:', error);
+        console.error('Error in users route:', error);
+        await reportErrorToSlack(error, { source: "api.users.get" });
         return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
     }
 }
@@ -57,6 +59,7 @@ export async function POST(request: NextRequest) {
         );
     } catch (error) {
         console.error('Create user error:', error);
+        await reportErrorToSlack(error, { source: "api.users.post" });
         return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
     }
 }

@@ -3,12 +3,15 @@ import { productService } from '@/src/server/services/products';
 import { productSchema } from '@/src/server/validations/products';
 import { requireApiTokenRole } from '@/src/lib/auth/withAuth';
 import { processAndUploadImage } from '@/src/server/utils/image-upload';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 /** GET /api/products — public, list all products */
 export async function GET() {
     try {
         const products = await productService.getProducts();
         return NextResponse.json({ success: true, products }, { status: 200 });
-    } catch {
+    } catch (error) {
+        console.error('Get products error:', error);
+        await reportErrorToSlack(error, { source: 'get-products', route: '/api/products', method: 'GET' });
         return NextResponse.json(
             { success: false, message: 'Failed to fetch products' },
             { status: 500 }
@@ -74,6 +77,7 @@ export async function POST(request: NextRequest) {
         );
     } catch (error) {
         console.error('Create product error:', error);
+        await reportErrorToSlack(error, { source: 'create-product', route: '/api/products', method: 'POST' });
         return NextResponse.json(
             { success: false, message: 'Failed to create product' },
             { status: 500 }

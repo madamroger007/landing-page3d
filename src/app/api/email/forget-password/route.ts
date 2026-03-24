@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/src/server/services/auth';
 import { forgotPasswordSchema } from '@/src/server/validations/auth';
 import { Resend } from 'resend';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
                     `,
                 });
             } catch (emailError) {
-                console.error('Failed to send reset email:', emailError);
+                await reportErrorToSlack(emailError, { source: 'forget-password', route: '/api/email/forget-password', method: 'POST' });
             }
         }
 
@@ -73,7 +74,8 @@ export async function POST(request: NextRequest) {
             message: 'If an account exists with this email, you will receive a password reset link.',
         });
     } catch (error) {
-        console.error('Forgot password error:', error);
+        console.error('Error in forgot-password route:', error);
+        await reportErrorToSlack(error, { source: 'forget-password', route: '/api/email/forget-password', method: 'POST' });
         return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
     }
 }

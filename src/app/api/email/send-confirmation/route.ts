@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireApiToken } from '@/src/lib/auth/withAuth';
 import { SendConfirmationEmail } from '@/src/server/services/email';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 /** POST /api/email/send-confirmation — requires Bearer token */
 export async function POST(req: NextRequest) {
@@ -18,6 +19,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, data });
     } catch (error) {
         console.error('Send confirmation error:', error);
+        await reportErrorToSlack(error, { source: 'send-confirmation', route: '/api/email/send-confirmation', method: 'POST' });
         return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
     }
 }

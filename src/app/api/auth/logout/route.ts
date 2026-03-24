@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 export async function POST() {
     try {
@@ -11,7 +12,8 @@ export async function POST() {
             message: 'Logged out successfully',
         });
     } catch (error) {
-        console.error('Logout error:', error);
+        console.error('Error in logout route:', error);
+        await reportErrorToSlack(error, { source: "api.logout" });
         return NextResponse.json(
             { success: false, message: 'Internal server error' },
             { status: 500 }

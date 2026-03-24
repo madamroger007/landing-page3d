@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/src/server/services/auth';
 import { resetPasswordSchema } from '@/src/server/validations/auth';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 export async function POST(request: NextRequest) {
     try {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
             message: result.message,
         });
     } catch (error) {
-        console.error('Reset password error:', error);
+        await reportErrorToSlack(error, { source: "api.reset-password.post" });
         return NextResponse.json(
             { success: false, message: 'Internal server error' },
             { status: 500 }
@@ -58,7 +59,8 @@ export async function GET(request: NextRequest) {
             valid: result.valid,
         });
     } catch (error) {
-        console.error('Validate token error:', error);
+        console.error('Error in reset-password GET route:', error);
+        await reportErrorToSlack(error, { source: "api.reset-password.get" });
         return NextResponse.json(
             { success: false, valid: false, message: 'Internal server error' },
             { status: 500 }

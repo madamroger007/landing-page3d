@@ -1,4 +1,5 @@
 import midtransClient from "midtrans-client";
+import { reportErrorToSlack } from "../lib/slack-error-reporter";
 
 type MidtransRequestBody = Record<string, unknown>;
 
@@ -51,6 +52,7 @@ export const midtransProvider = {
         try {
             return (await coreApi.charge(payload)) as Record<string, unknown>;
         } catch (error) {
+            await reportErrorToSlack(error, { source: 'midtrans-create-charge', route: 'server/providers/midtransProvider', method: 'POST' });
             throw toReadableMidtransError(error, "Midtrans charge failed");
         }
     },
@@ -59,6 +61,7 @@ export const midtransProvider = {
         try {
             return (await coreApiTransactionActions.status(orderId)) as Record<string, unknown>;
         } catch (error) {
+            await reportErrorToSlack(error, { source: 'midtrans-check-transaction', route: 'server/providers/transaction-status', method: 'GET' });
             throw toReadableMidtransError(error, "Failed to fetch Midtrans transaction status");
         }
     },
@@ -67,6 +70,7 @@ export const midtransProvider = {
         try {
             return (await coreApiTransactionActions.cancel(orderId)) as Record<string, unknown>;
         } catch (error) {
+            await reportErrorToSlack(error, { source: 'midtrans-cancel-transaction', route: 'server/providers/cancel-transaction', method: 'POST' });
             throw toReadableMidtransError(error, "Failed to cancel Midtrans transaction");
         }
     },

@@ -3,6 +3,7 @@ import { MidtransTransaction } from "@/src/types/type";
 import { createPaymentService, createPaymentWithCoreApi } from "@/src/server/services/payment";
 import { ordersRepository } from "@/src/server/repositories/orders";
 import { buildRateLimitHeaders, checkRateLimit, getRequestIp } from "@/src/server/lib/rateLimit";
+import { reportErrorToSlack } from "@/src/server/lib/slack-error-reporter";
 
 const ORDER_ID_PATTERN = /^[A-Za-z0-9._-]{8,64}$/;
 
@@ -92,6 +93,7 @@ export async function POST(req: NextRequest) {
             await createPaymentService(bodyToSave);
         } catch (dbError) {
             console.error("[create-transaction] Failed to save order:", dbError);
+            await reportErrorToSlack(dbError, { source: 'create-transaction', route: '/api/payment/create-transaction', method: 'POST' });
         }
 
         return NextResponse.json({
@@ -102,7 +104,7 @@ export async function POST(req: NextRequest) {
         });
     } catch (err) {
         console.error("[create-transaction]", err);
-
+        await reportErrorToSlack(err, { source: 'create-transaction', route: '/api/payment/create-transaction', method: 'POST' });
         const message = err instanceof Error ? err.message : "Internal server error";
         const isClientError =
             message.includes("not enabled") ||

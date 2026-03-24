@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ordersRepository } from '@/src/server/repositories/orders';
 import { buildRateLimitHeaders, checkRateLimit, getRequestIp } from '@/src/server/lib/rateLimit';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 export async function POST(req: NextRequest) {
     try {
@@ -38,6 +39,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ orders: normalized });
     } catch (err) {
         console.error('[orders-public]', err);
+        await reportErrorToSlack(err, { source: 'orders-public', route: '/api/payment/orders', method: 'POST' });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

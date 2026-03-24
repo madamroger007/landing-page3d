@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { midtransProvider } from '@/src/server/providers/midtransProvider';
 import { calculateEstimatedFee } from '@/src/server/lib/paymentFee';
+import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
 type FeeEstimateRequest = {
     subtotal: number;
@@ -41,6 +42,7 @@ export async function POST(req: NextRequest) {
         });
     } catch (error) {
         console.error('[fee-estimate]', error);
+        await reportErrorToSlack(error, { source: 'fee-estimate', route: '/api/payment/fee-estimate', method: 'POST' });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

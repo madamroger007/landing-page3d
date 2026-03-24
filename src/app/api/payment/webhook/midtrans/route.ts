@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { ordersRepository } from "@/src/server/repositories/orders";
 import { extractPaymentPersistenceFields } from "@/src/utils/payment";
+import { reportErrorToSlack } from "@/src/server/lib/slack-error-reporter";
 
 function computeSignature(orderId: string, statusCode: string, grossAmount: string, serverKey: string) {
     return crypto
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error("[midtrans-webhook]", error);
+        await reportErrorToSlack(error, { source: 'midtrans-webhook', route: '/api/payment/webhook/midtrans', method: 'POST' });
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
