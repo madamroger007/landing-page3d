@@ -13,7 +13,6 @@ function getBaseUrl(): string {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = getBaseUrl();
     const now = new Date();
-    const products = await productService.getProducts();
 
     const staticRoutes: MetadataRoute.Sitemap = [
         {
@@ -30,12 +29,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
     ];
 
-    const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
-        url: `${baseUrl}/products/${product.id}`,
-        lastModified: product.createdAt ? new Date(product.createdAt) : now,
-        changeFrequency: "weekly",
-        priority: 0.8,
-    }));
+    try {
+        const products = await productService.getProducts();
 
-    return [...staticRoutes, ...productRoutes];
+        const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
+            url: `${baseUrl}/products/${product.id}`,
+            lastModified: product.createdAt ? new Date(product.createdAt) : now,
+            changeFrequency: "weekly",
+            priority: 0.8,
+        }));
+
+        return [...staticRoutes, ...productRoutes];
+    } catch (error) {
+        console.warn("[sitemap] Falling back to static routes:", error);
+        return staticRoutes;
+    }
 }

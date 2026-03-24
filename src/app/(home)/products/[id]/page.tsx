@@ -14,8 +14,13 @@ function toProductId(value: string): number {
 }
 
 export async function generateStaticParams() {
-    const products = await productService.getProducts();
-    return products.map((product) => ({ id: String(product.id) }));
+    try {
+        const products = await productService.getProducts();
+        return products.map((product) => ({ id: String(product.id) }));
+    } catch (error) {
+        console.warn("[products/[id]] Skipping static params generation:", error);
+        return [];
+    }
 }
 
 export async function generateMetadata({ params }: ProductPageParams): Promise<Metadata> {

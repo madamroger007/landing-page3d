@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Syne, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import ProductsProviders from "../store/providers/ProductsProviders";
@@ -40,7 +41,9 @@ export default function RootLayout({
       <body
         className={`${syne.variable} ${spaceGrotesk.variable} antialiased selection:bg-neon-blue selection:text-white cursor-hidden`}
       >
-        <GoogleAnalytics measurementId={gaMeasurementId} />
+        <Suspense fallback={null}>
+          <GoogleAnalytics measurementId={gaMeasurementId} />
+        </Suspense>
         <GoogleAdSense publisherId={adSensePublisherId} />
         <CartProvider>
           <ProductsProviders>{children}</ProductsProviders>
