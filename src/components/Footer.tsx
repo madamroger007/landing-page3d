@@ -1,6 +1,6 @@
 "use client";
 
-import { TypeIcon, Instagram,  Youtube, XIcon, Facebook } from 'lucide-react';
+import { TypeIcon, Instagram,  Youtube,  Facebook } from 'lucide-react';
 import LogoComponent from './LogoComponent';
 import Link from 'next/link';
 
@@ -11,19 +11,16 @@ export default function Footer() {
                 <LogoComponent />
 
                 <div className="flex items-center gap-6">
-                    <Link href={process.env.NEXT_PUBLIC_YOUTUBE || ""} target="_blank">
+                    <Link href={process.env.NEXT_PUBLIC_APP_YOUTUBE || ""} target="_blank">
                         <SocialIcon icon={<Youtube size={18} />} />
                     </Link>
-                    <Link href={process.env.NEXT_PUBLIC_INSTAGRAM || ""} target="_blank">
+                    <Link href={process.env.NEXT_PUBLIC_APP_INSTAGRAM || ""} target="_blank">
                         <SocialIcon icon={<Instagram size={18} />} />
                     </Link>
-                    <Link href={process.env.NEXT_PUBLIC_X || ""} target="_blank">
-                        <SocialIcon icon={<XIcon size={18} />} />
-                    </Link>
-                    <Link href={process.env.NEXT_PUBLIC_TIKTOK || ""} target="_blank">
+                    <Link href={process.env.NEXT_PUBLIC_APP_TIKTOK || ""} target="_blank">
                         <SocialIcon icon={<TypeIcon size={18} />} />
                     </Link>
-                    <Link href={process.env.NEXT_PUBLIC_FIVER || ""} target="_blank">
+                    <Link href={process.env.NEXT_PUBLIC_APP_FACEBOOK || ""} target="_blank">
                         <SocialIcon icon={<Facebook size={18} />} />
                     </Link>
 
