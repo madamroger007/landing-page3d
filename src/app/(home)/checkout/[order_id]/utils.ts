@@ -1,6 +1,8 @@
 import { Orders } from "@/src/types/type";
 import { DbOrderInfo, OrderLabel } from "./types";
 
+const PENDING_ORDERS_STORAGE_KEY = "pending_orders";
+
 export function normalizeOrderLabel(status?: string | null): OrderLabel {
     const raw = (status || "pending").toLowerCase();
 
@@ -35,7 +37,7 @@ export function labelClassName(label: OrderLabel): string {
 
 function parsePendingOrdersRecord(): Record<string, Orders> {
     try {
-        const raw = localStorage.getItem("pending_orders") || "{}";
+        const raw = localStorage.getItem(PENDING_ORDERS_STORAGE_KEY) || "{}";
         const parsed = JSON.parse(raw) as unknown;
 
         if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
@@ -46,6 +48,12 @@ function parsePendingOrdersRecord(): Record<string, Orders> {
     } catch {
         return {};
     }
+}
+
+export function upsertPendingOrder(order: Orders): void {
+    const pending = parsePendingOrdersRecord();
+    pending[order.order_id] = order;
+    localStorage.setItem(PENDING_ORDERS_STORAGE_KEY, JSON.stringify(pending));
 }
 
 export function readPendingOrders(): Orders[] {
@@ -60,6 +68,58 @@ export function readPendingOrders(): Orders[] {
 export function readPendingOrderById(orderId: string): Orders | null {
     const pending = parsePendingOrdersRecord();
     return pending[orderId] || null;
+}
+
+function normalizePublicOrder(payload: unknown): Orders | null {
+    if (!payload || typeof payload !== "object") return null;
+
+    const source = payload as Partial<Orders>;
+    const orderId = typeof source.order_id === "string" ? source.order_id : "";
+
+    if (!orderId) return null;
+
+    return {
+        createdAt: typeof source.createdAt === "string" ? source.createdAt : new Date().toISOString(),
+        items: Array.isArray(source.items) ? source.items : [],
+        order_id: orderId,
+        status: typeof source.status === "string" ? source.status : "pending",
+        product_link: typeof source.product_link === "string" ? source.product_link : undefined,
+        gross_amount:
+            typeof source.gross_amount === "number" && Number.isFinite(source.gross_amount)
+                ? source.gross_amount
+                : 0,
+        snap_token: typeof source.snap_token === "string" ? source.snap_token : undefined,
+        customer:
+            source.customer && typeof source.customer === "object"
+                ? {
+                    name: typeof source.customer.name === "string" ? source.customer.name : "",
+                    email: typeof source.customer.email === "string" ? source.customer.email : "",
+                    phone: typeof source.customer.phone === "string" ? source.customer.phone : "",
+                }
+                : { name: "", email: "", phone: "" },
+        payment_method: typeof source.payment_method === "string" ? source.payment_method : undefined,
+        payment_name: typeof source.payment_name === "string" ? source.payment_name : undefined,
+        payment_va: typeof source.payment_va === "string" ? source.payment_va : undefined,
+        transaction_id: typeof source.transaction_id === "string" ? source.transaction_id : undefined,
+    };
+}
+
+export async function fetchPublicOrderById(orderId: string): Promise<Orders | null> {
+    if (!orderId) return null;
+
+    try {
+        const response = await fetch(`/api/payment/orders/public?order_id=${encodeURIComponent(orderId)}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) return null;
+
+        const data = (await response.json()) as { order?: unknown };
+        return normalizePublicOrder(data.order);
+    } catch {
+        return null;
+    }
 }
 
 export async function fetchDbOrdersByIds(orderIds: string[]): Promise<Record<string, DbOrderInfo>> {

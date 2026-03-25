@@ -10,7 +10,7 @@ type PaymentInstructionsPanelProps = {
     displayData: PaymentDisplayData;
     store?: string;
     copied: boolean;
-    onCopy: () => void;
+    onCopy: (value: string) => void;
 };
 
 export default function PaymentInstructionsPanel({
@@ -62,7 +62,11 @@ export default function PaymentInstructionsPanel({
                                 >
                                     <span className="text-white/60 text-xs uppercase">{va.bank}</span>
                                     <span className="font-mono text-neon-blue text-sm">{va.va_number}</span>
-                                    <button onClick={onCopy} className="p-2.5 rounded-xl hover:bg-white/10 transition-colors">
+                                    <button
+                                        type="button"
+                                        onClick={() => onCopy(va.va_number)}
+                                        className="p-2.5 rounded-xl hover:bg-white/10 transition-colors"
+                                    >
                                         {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-white/30" />}
                                     </button>
                                 </div>

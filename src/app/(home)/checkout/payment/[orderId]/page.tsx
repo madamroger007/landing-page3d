@@ -2,42 +2,79 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import CustomCursor from "@/src/components/CustomCursor";
 import { Orders } from "@/src/types/type";
 import { formatMoneyFromIdr, resolveUserLocaleCurrency } from "@/src/utils/utils";
+import { fetchPublicOrderById, readPendingOrderById, upsertPendingOrder } from "../../[order_id]/utils";
 import PaymentInstructionsPanel from "./components/payment-instructions-panel";
 import PaymentLoadingState from "./components/payment-loading-state";
 import { getMethodDetails } from "./components/payment-method-details";
 import PaymentOrderActions from "./components/payment-order-actions";
+import PaymentNotFoundState from "./components/payment-not-found-state";
 import PaymentTopInfo from "./components/payment-top-info";
 import { buildPaymentDisplayData, extractPaymentMetaFromStatus, normalizeStatus } from "./components/payment-utils";
 import { SendEmailConfirmation } from "@/src/server/actions/email/action";
 
 export default function PaymentStatusPage() {
   const { orderId } = useParams();
-  const router = useRouter();
+  const orderIdParam = typeof orderId === "string" ? orderId : "";
   const [order, setOrder] = useState<Orders | null>(null);
+  const [isResolvingOrder, setIsResolvingOrder] = useState(true);
+  const [notFoundMessage, setNotFoundMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [{ locale, currency }] = useState(() => resolveUserLocaleCurrency());
 
   useEffect(() => {
-    const savedOrders = JSON.parse(localStorage.getItem("pending_orders") || "{}");
-    const foundOrder = savedOrders[orderId as string];
+    let isActive = true;
 
-    if (foundOrder) {
-      Promise.resolve().then(() => setOrder(foundOrder));
-      return;
-    }
+    const resolveOrder = async () => {
+      if (!orderIdParam) {
+        if (!isActive) return;
+        setOrder(null);
+        setNotFoundMessage("Invalid order ID.");
+        setIsResolvingOrder(false);
+        return;
+      }
 
-    setTimeout(() => router.push("/products"), 3000);
-  }, [orderId, router]);
+      const localOrder = readPendingOrderById(orderIdParam);
+      if (localOrder) {
+        if (!isActive) return;
+        setOrder(localOrder);
+        setNotFoundMessage("");
+        setIsResolvingOrder(false);
+        return;
+      }
+
+      const serverOrder = await fetchPublicOrderById(orderIdParam);
+
+      if (!isActive) return;
+
+      if (serverOrder) {
+        upsertPendingOrder(serverOrder);
+        setOrder(serverOrder);
+        setNotFoundMessage("");
+      } else {
+        setOrder(null);
+        setNotFoundMessage("Order not found in local storage or server data.");
+      }
+
+      setIsResolvingOrder(false);
+    };
+
+    void resolveOrder();
+
+    return () => {
+      isActive = false;
+    };
+  }, [orderIdParam]);
 
   const copyToClipboard = (text: string) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -97,9 +134,7 @@ export default function PaymentStatusPage() {
           : order.raw_snap_result,
       };
 
-      const savedOrders = JSON.parse(localStorage.getItem("pending_orders") || "{}");
-      savedOrders[order.order_id] = mergedOrder;
-      localStorage.setItem("pending_orders", JSON.stringify(savedOrders));
+      upsertPendingOrder(mergedOrder);
 
       setOrder(mergedOrder);
       setStatusMessage(`Latest status: ${String(data.transaction_status || "pending")}`);
@@ -110,8 +145,12 @@ export default function PaymentStatusPage() {
     }
   };
 
-  if (!order) {
+  if (isResolvingOrder) {
     return <PaymentLoadingState />;
+  }
+
+  if (!order) {
+    return <PaymentNotFoundState message={notFoundMessage} />;
   }
 
   const isSuccess = order.status === "success";
@@ -158,7 +197,7 @@ export default function PaymentStatusPage() {
                 displayData={displayData}
                 store={order.store}
                 copied={copied}
-                onCopy={() => copyToClipboard(order.va_numbers?.[0]?.va_number || "")}
+                onCopy={copyToClipboard}
               />
 
               <PaymentOrderActions

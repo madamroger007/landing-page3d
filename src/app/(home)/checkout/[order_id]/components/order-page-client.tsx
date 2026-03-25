@@ -9,9 +9,9 @@ import OrderSummaryCard from "./order-summary-card";
 import { useOrderDetailData } from "../hooks/use-order-detail-data";
 
 export default function OrderPageClient({ orderId }: { orderId: string }) {
-    const { isHydrated, order, dbOrder } = useOrderDetailData(orderId);
+    const { isHydrated, isResolvingOrder, order, dbOrder } = useOrderDetailData(orderId);
 
-    if (!isHydrated) {
+    if (!isHydrated || isResolvingOrder) {
         return (
             <OrderPageShell>
                 <OrderLoadingState message="Loading order..." />
@@ -20,7 +20,7 @@ export default function OrderPageClient({ orderId }: { orderId: string }) {
     }
 
     if (!order) {
-        return <OrderNotFoundState />;
+        return <OrderNotFoundState message="Order not found in local storage or server data." />;
     }
 
     return (
