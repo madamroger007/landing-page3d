@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import CustomCursor from "@/src/components/CustomCursor";
@@ -16,10 +16,10 @@ import PaymentOrderActions from "./components/payment-order-actions";
 import PaymentNotFoundState from "./components/payment-not-found-state";
 import PaymentTopInfo from "./components/payment-top-info";
 import { buildPaymentDisplayData, extractPaymentMetaFromStatus, normalizeStatus } from "./components/payment-utils";
-import { SendEmailConfirmation } from "@/src/server/actions/email/action";
 
 export default function PaymentStatusPage() {
   const { orderId } = useParams();
+  const router = useRouter();
   const orderIdParam = typeof orderId === "string" ? orderId : "";
   const [order, setOrder] = useState<Orders | null>(null);
   const [isResolvingOrder, setIsResolvingOrder] = useState(true);
@@ -96,18 +96,6 @@ export default function PaymentStatusPage() {
         throw new Error((data.error as string) || "Failed to fetch payment status");
       }
 
-      // send email to user about the status success or failed
-      if (data.transaction_status === "settlement") {
-        await SendEmailConfirmation({
-          email: order.customer.email,
-          name: order.customer.name,
-          order_id: order.order_id,
-          items: JSON.stringify(order.items),
-          total: order.gross_amount,
-        });
-
-      }
-
       const nextStatus = normalizeStatus((data.transaction_status as string) || "pending");
       const nextMeta = extractPaymentMetaFromStatus(data, {
         preferredPaymentName: order.payment_name,
@@ -137,6 +125,26 @@ export default function PaymentStatusPage() {
       upsertPendingOrder(mergedOrder);
 
       setOrder(mergedOrder);
+
+      if (nextStatus === "success") {
+        const params = new URLSearchParams({
+          order_id: mergedOrder.order_id,
+          message: "Payment confirmed successfully.",
+          email_status: "not-sent",
+        });
+        router.push(`/checkout/payment/status/success?${params.toString()}`);
+        return;
+      }
+
+      if (nextStatus === "failed") {
+        const params = new URLSearchParams({
+          order_id: mergedOrder.order_id,
+          message: "Payment failed or expired. Please retry your payment.",
+        });
+        router.push(`/checkout/payment/status/error?${params.toString()}`);
+        return;
+      }
+
       setStatusMessage(`Latest status: ${String(data.transaction_status || "pending")}`);
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : "Failed to check payment status");
