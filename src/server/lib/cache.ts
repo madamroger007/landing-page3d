@@ -16,6 +16,12 @@ export const CACHE_KEYS = {
     VOUCHERS_ALL: 'vouchers:all',
     VOUCHER_BY_ID: (id: number) => `vouchers:${id}`,
     VOUCHER_BY_CODE: (code: string) => `vouchers:code:${code}`,
+
+    // Orders
+    ORDERS_ALL: (limit: number) => `orders:all:${limit}`,
+    ORDERS_BY_STATUS: (status: string, limit: number) => `orders:status:${status}:${limit}`,
+    ORDER_BY_ID: (orderId: string) => `orders:id:${orderId}`,
+    ORDERS_BY_IDS: (orderIds: string[]) => `orders:ids:${[...orderIds].sort().join(',')}`,
 } as const;
 
 // ─── Default TTLs (in seconds) ───────────────────────────────────────────────
@@ -111,6 +117,18 @@ export async function invalidateCategoryCache(): Promise<void> {
  */
 export async function invalidateVoucherCache(): Promise<void> {
     await deleteCacheByPattern('vouchers:*');
+}
+
+/**
+ * Invalidate all order-related cache
+ */
+export async function invalidateOrderCache(orderId?: string): Promise<void> {
+    await deleteCacheByPattern('orders:*');
+
+    // Explicit delete for direct-key compatibility and future granularity.
+    if (orderId) {
+        await deleteCache(CACHE_KEYS.ORDER_BY_ID(orderId));
+    }
 }
 
 // ─── Cache-Aside Pattern Helper ──────────────────────────────────────────────

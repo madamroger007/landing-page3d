@@ -7,6 +7,7 @@
 import { desc, eq, inArray } from 'drizzle-orm';
 import { db } from '@/src/server/db';
 import { InsertOrder, SelectOrder, ordersTable } from '@/src/server/db/schema/orders';
+import { CACHE_KEYS, CACHE_TTL, cacheAside, invalidateOrderCache } from '@/src/server/lib/cache';
 
 // ─── Orders Repository ───────────────────────────────────────────────────────
 
@@ -15,43 +16,68 @@ export const ordersRepository = {
      * Get all orders (most recent first)
      */
     async getAllOrders(limit: number = 50): Promise<SelectOrder[]> {
-        return await db
-            .select()
-            .from(ordersTable)
-            .orderBy(desc(ordersTable.createdAt))
-            .limit(limit);
+        return cacheAside(
+            CACHE_KEYS.ORDERS_ALL(limit),
+            async () =>
+                await db
+                    .select()
+                    .from(ordersTable)
+                    .orderBy(desc(ordersTable.createdAt))
+                    .limit(limit),
+            CACHE_TTL.SHORT
+        );
     },
 
     async getOrdersByStatus(status: string, limit: number = 50): Promise<SelectOrder[]> {
-        return await db
-            .select()
-            .from(ordersTable)
-            .where(eq(ordersTable.transactionStatus, status))
-            .orderBy(desc(ordersTable.createdAt))
-            .limit(limit);
+        return cacheAside(
+            CACHE_KEYS.ORDERS_BY_STATUS(status, limit),
+            async () =>
+                await db
+                    .select()
+                    .from(ordersTable)
+                    .where(eq(ordersTable.transactionStatus, status))
+                    .orderBy(desc(ordersTable.createdAt))
+                    .limit(limit),
+            CACHE_TTL.SHORT
+        );
     },
 
     /**
      * Get order by order_id
      */
     async getOrderByOrderId(orderId: string): Promise<SelectOrder | undefined> {
-        const [order] = await db
-            .select()
-            .from(ordersTable)
-            .where(eq(ordersTable.orderId, orderId))
-            .limit(1);
+        const order = await cacheAside(
+            CACHE_KEYS.ORDER_BY_ID(orderId),
+            async () => {
+                const [item] = await db
+                    .select()
+                    .from(ordersTable)
+                    .where(eq(ordersTable.orderId, orderId))
+                    .limit(1);
 
-        return order;
+                return item ?? null;
+            },
+            CACHE_TTL.MEDIUM
+        );
+
+        return order ?? undefined;
     },
 
     async getOrdersByOrderIds(orderIds: string[]): Promise<SelectOrder[]> {
         if (orderIds.length === 0) return [];
 
-        return await db
-            .select()
-            .from(ordersTable)
-            .where(inArray(ordersTable.orderId, orderIds))
-            .orderBy(desc(ordersTable.createdAt));
+        const uniqueOrderIds = [...new Set(orderIds)];
+
+        return cacheAside(
+            CACHE_KEYS.ORDERS_BY_IDS(uniqueOrderIds),
+            async () =>
+                await db
+                    .select()
+                    .from(ordersTable)
+                    .where(inArray(ordersTable.orderId, uniqueOrderIds))
+                    .orderBy(desc(ordersTable.createdAt)),
+            CACHE_TTL.SHORT
+        );
     },
 
     /**
@@ -62,6 +88,8 @@ export const ordersRepository = {
             .insert(ordersTable)
             .values(order)
             .returning();
+
+        await invalidateOrderCache(order.orderId);
 
         return newOrder;
     },
@@ -79,6 +107,8 @@ export const ordersRepository = {
             .where(eq(ordersTable.orderId, orderId))
             .returning();
 
+        await invalidateOrderCache(orderId);
+
         return updated;
     },
 
@@ -88,6 +118,8 @@ export const ordersRepository = {
             .set({ orderLabel: label, updatedAt: new Date() })
             .where(eq(ordersTable.orderId, orderId))
             .returning();
+
+        await invalidateOrderCache(orderId);
 
         return updated;
     },
@@ -111,6 +143,8 @@ export const ordersRepository = {
             .set(patch)
             .where(eq(ordersTable.orderId, orderId))
             .returning();
+
+        await invalidateOrderCache(orderId);
 
         return updated;
     },
@@ -173,6 +207,8 @@ export const ordersRepository = {
             .where(eq(ordersTable.orderId, orderId))
             .returning();
 
+        await invalidateOrderCache(orderId);
+
         return updated;
     },
 
@@ -184,6 +220,8 @@ export const ordersRepository = {
             .delete(ordersTable)
             .where(eq(ordersTable.orderId, orderId))
             .returning();
+
+        await invalidateOrderCache(orderId);
 
         return deleted.length > 0;
     },

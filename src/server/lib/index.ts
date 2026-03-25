@@ -17,6 +17,7 @@ export {
     invalidateProductCache,
     invalidateCategoryCache,
     invalidateVoucherCache,
+    invalidateOrderCache,
     CACHE_KEYS,
     CACHE_TTL,
 } from './cache';
