@@ -5,7 +5,6 @@ import "./globals.css";
 import ProductsProviders from "../store/providers/ProductsProviders";
 import { CartProvider } from "../store/context/cart/CartContext";
 import GoogleAnalytics from "../components/analytics/GoogleAnalytics";
-import GoogleAdSense from "../components/analytics/GoogleAdSense";
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 const syne = Syne({
@@ -35,7 +34,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_ID;
-  const adSensePublisherId = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID;
 
   return (
     <html lang="en">
@@ -47,7 +45,6 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <GoogleAnalytics measurementId={gaMeasurementId} />
         </Suspense>
-        <GoogleAdSense publisherId={adSensePublisherId} />
         <CartProvider>
           <ProductsProviders>{children}</ProductsProviders>
         </CartProvider>
