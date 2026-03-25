@@ -121,14 +121,6 @@ export default async function Home() {
             <ArtworkCTA />
           </div>
         </SectionWrapper>
-
-        <SectionWrapper id="help" className="bg-radial-[at_40%_30%] from-[#547792]/20 via-[#000080]/40 to-[#000000]/80">
-          <div className="glass-card rounded-[2.5rem] p-8 md:p-16 relative overflow-hidden group border-white/10 shadow-3xl shadow-neon-purple/5">
-            <div className="absolute inset-0  from-neon-purple/5 to-transparent opacity-40" />
-            <Newsletter />
-          </div>
-        </SectionWrapper>
-
         <Footer />
       </main>
     </>

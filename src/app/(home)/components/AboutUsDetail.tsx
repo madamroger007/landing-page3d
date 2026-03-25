@@ -3,12 +3,13 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 
 const services = [
     {
         id: "01",
         title: "Image",
-        image: "/nft-card-1.png",
+        image: "/images.png",
         detailsTitle: "Editing Image",
         items: ["Poster", "Banner", "Social Media", "Product Image", "Logo", "other"],
     },
@@ -22,14 +23,14 @@ const services = [
     {
         id: "03",
         title: "Website",
-        image: "/nft-card-1.png",
+        image: "/website.jpg",
         detailsTitle: "Website",
         items: ["Landing Page", "E-commerce", "CMS Integration", "Landing Page 3D", "other"],
     },
-       {
+    {
         id: "04",
         title: "2D & 3D",
-        image: "/nft-card-1.png",
+        image: "/Desktop.png",
         detailsTitle: "2D & 3D",
         items: ["Asset 2D", "Asset 3D", "Animation", "Rendering", "other"],
     },
@@ -89,14 +90,16 @@ export default function AboutUsDetail() {
 
                                 {/* Center Button Appearance */}
                                 <div className="absolute inset-0 flex items-center justify-center lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500">
-                                    <motion.button
-                                        whileHover={{ scale: 1.1 }}
-                                        className="w-20 h-20 md:w-24 md:h-24 rounded-full flex flex-col items-center justify-center text-black font-bold text-[10px] uppercase tracking-tighter shadow-2xl"
-                                        style={{ backgroundColor: YELLOW_ACCENT }}
-                                    >
-                                        <ArrowUpRight className="w-5 h-5 md:w-6 md:h-6 mb-1" />
-                                        View Details
-                                    </motion.button>
+                                    <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/products`}>
+                                        <motion.button
+                                            whileHover={{ scale: 1.1 }}
+                                            className="w-20 h-20 md:w-24 md:h-24 rounded-full flex flex-col items-center justify-center text-black font-bold text-[10px] uppercase tracking-tighter shadow-2xl"
+                                            style={{ backgroundColor: YELLOW_ACCENT }}
+                                        >
+                                            <ArrowUpRight className="w-5 h-5 md:w-6 md:h-6 mb-1" />
+                                            View Details
+                                        </motion.button>
+                                    </Link>
                                 </div>
                             </div>
                         </div>

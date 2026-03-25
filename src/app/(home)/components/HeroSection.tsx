@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import InteractiveStack from "@/src/components/card/InteractiveStack";
 import { useProductContext } from "@/src/store/context/product/ProductContext";
+import Link from "next/link";
 
 const stats = [
     { value: "100+", label: "our consumer" },
@@ -45,9 +46,9 @@ export default function HeroSection() {
                             We could help to improve and optimize existing designs by refining layouts, colors, typography, and user interface elements. Our service focuses on creating modern, responsive, and visually appealing designs that enhance usability and user experience
                         </p>
 
-                        <button className="poly-button font-syne text-base md:text-lg uppercase tracking-wider mx-auto lg:mx-0 hover:border-b-4 hover:border-neon-blue hover:text-neon-blue transition-colors">
+                        <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/products`} className="poly-button font-syne text-base md:text-lg uppercase tracking-wider mx-auto lg:mx-0 hover:border-b-4 hover:border-neon-blue hover:text-neon-blue transition-colors">
                             Explore Now
-                        </button>
+                        </Link>
 
                     </motion.div>
 

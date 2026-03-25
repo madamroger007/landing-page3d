@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import InteractiveStack from "@/src/components/card/InteractiveStack";
 import { useProductContext } from "@/src/store/context/product/ProductContext";
+import Link from "next/link";
 
 export default function AboutUs() {
     const { products } = useProductContext()
@@ -33,9 +34,9 @@ export default function AboutUs() {
                         </p>
                     </div>
 
-                    <button className="poly-button font-syne text-base md:text-lg uppercase tracking-wider mx-auto lg:mx-0 hover:border-b-4 hover:border-neon-blue hover:text-neon-blue transition-colors">
-                        Read More
-                    </button>
+                    <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/products`} className="poly-button font-syne text-base md:text-lg uppercase tracking-wider mx-auto lg:mx-0 hover:border-b-4 hover:border-neon-blue hover:text-neon-blue transition-colors">
+                        Explore Now
+                    </Link>
                 </motion.div>
             </div>
         </div>

@@ -18,8 +18,6 @@ export default function BackgroundLayout() {
             <div className="absolute top-[40%] right-[5%] w-[500px] h-[500px] bg-neon-purple/10 blur-[150px] rounded-full" />
             <div className="absolute bottom-[10%] left-[15%] w-[700px] h-[700px] bg-neon-blue/5 blur-[200px] rounded-full" />
 
-            {/* Subtle Scanline / Noise Overlay */}
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
         </div>
     );
 }
