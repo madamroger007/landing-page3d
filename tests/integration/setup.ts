@@ -4,8 +4,8 @@ import { afterEach, beforeAll, vi } from 'vitest';
 process.env.JWT_SECRET ??= 'test-jwt-secret';
 
 beforeAll(() => {
-    if (!process.env.POSTGRES_DB_TEST) {
-        throw new Error('POSTGRES_DB_TEST is required for integration tests');
+    if (!process.env.DATABASE_URL) {
+        throw new Error('DATABASE_URL is required for integration tests');
     }
 });
 

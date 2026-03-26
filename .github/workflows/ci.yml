@@ -19,7 +19,7 @@ env:
   NEXT_PUBLIC_MIDTRANS_CLIENT_KEY: ci-test-client-key
   MIDTRANS_SERVER_KEY: ci-test-server-key
   RESEND_API_KEY: ci-test-resend-key
-  POSTGRES_DB_TEST: postgres://postgres:postgres@localhost:5432/postgres
+  DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
 
 jobs:
   setup:
@@ -118,7 +118,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB_TEST: postgres
+          DATABASE_URL: postgres
         ports:
           - 5432:5432
         options: >-
@@ -161,7 +161,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB_TEST: postgres
+          DATABASE_URL: postgres
         ports:
           - 5432:5432
         options: >-
