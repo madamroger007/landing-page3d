@@ -80,7 +80,6 @@ describe('auth users route integration', () => {
         expect(response.status).toBe(201);
 
         const createdUser = await authRepository.findUserByEmail('created-user@example.com');
-        expect(createdUser).toBeDefined();
         expect(createdUser?.password).toBeTruthy();
         expect(createdUser?.password).not.toBe('Password123');
     });
