@@ -146,7 +146,7 @@ describe('payment public checkout integration', () => {
 
         expect(response.status).toBe(200);
         const payload = (await response.json()) as { orders: Array<{ orderId: string }> };
-        expect(payload.orders).toHaveLength(1);
         expect(payload.orders[0].orderId).toBe('ORDER-40001');
+        expect(payload.orders.length).toBe(1);
     });
 });

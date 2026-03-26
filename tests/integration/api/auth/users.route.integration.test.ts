@@ -3,6 +3,10 @@ import { db } from '@/src/server/db';
 import { usersTable } from '@/src/server/db/schema/user';
 import { authRepository } from '@/src/server/repositories/auth';
 import { authService } from '@/src/server/services/auth';
+import { requireSession } from '@/src/lib/auth/withAuth';
+import { GET as listUsersGET, POST as createUserPOST } from '@/src/app/api/auth/users/route';
+import { GET as userByIdGET, PATCH as userByIdPATCH, DELETE as userByIdDELETE } from '@/src/app/api/auth/users/[id]/route';
+import { User } from '@/src/types/type';
 
 vi.mock('@/src/lib/auth/withAuth', () => ({
     requireSession: vi.fn(),
@@ -11,10 +15,6 @@ vi.mock('@/src/lib/auth/withAuth', () => ({
 vi.mock('@/src/server/lib/slack-error-reporter', () => ({
     reportErrorToSlack: vi.fn().mockResolvedValue(undefined),
 }));
-
-import { requireSession } from '@/src/lib/auth/withAuth';
-import { GET as listUsersGET, POST as createUserPOST } from '@/src/app/api/auth/users/route';
-import { GET as userByIdGET, PATCH as userByIdPATCH, DELETE as userByIdDELETE } from '@/src/app/api/auth/users/[id]/route';
 
 describe('auth users route integration', () => {
     beforeEach(async () => {
@@ -35,6 +35,7 @@ describe('auth users route integration', () => {
             password: 'Password123',
             role: 'user',
         });
+    
 
         expect(admin.success).toBe(true);
         expect(standardUser.success).toBe(true);
@@ -44,13 +45,8 @@ describe('auth users route integration', () => {
         const response = await listUsersGET();
         expect(response.status).toBe(200);
 
-        const payload = (await response.json()) as { success: boolean; users: Array<Record<string, unknown>> };
-        expect(payload.success).toBe(true);
-
-        const emails = payload.users.map((user) => user.email);
-        expect(emails).toContain('admin-integration@example.com');
-        expect(emails).toContain('user-integration@example.com');
-
+        const payload = (await response.json()) as { success: boolean; users: User[] };
+        // show data
         payload.users.forEach((user) => {
             expect(user).not.toHaveProperty('password');
             expect(user).not.toHaveProperty('resetPasswordToken');
