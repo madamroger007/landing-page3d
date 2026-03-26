@@ -4,10 +4,6 @@ import { requireSession } from '@/src/lib/auth/withAuth';
 import { updateUserSchema } from '@/src/server/validations/auth';
 import { reportErrorToSlack } from '@/src/server/lib/slack-error-reporter';
 
-interface RouteParams {
-    params: Promise<{ id: string }>;
-}
-
 function sanitizeUser(user: Awaited<ReturnType<typeof authRepository.findUserById>>) {
     if (!user) return null;
     const {
@@ -23,7 +19,7 @@ function sanitizeUser(user: Awaited<ReturnType<typeof authRepository.findUserByI
 }
 
 /** GET /api/auth/users/[id] — authenticated (requires cookie session) */
-export async function GET({ params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const auth = await requireSession();
         if (auth instanceof NextResponse) return auth;
@@ -52,7 +48,7 @@ export async function GET({ params }: RouteParams) {
 }
 
 /** PATCH /api/auth/users/[id] — admin only (requires cookie session) */
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const auth = await requireSession();
         if (auth instanceof NextResponse) return auth;
@@ -82,7 +78,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 /** DELETE /api/auth/users/[id] — admin only, cannot self-delete (requires cookie session) */
-export async function DELETE({ params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const auth = await requireSession();
         if (auth instanceof NextResponse) return auth;
