@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import type { TokenView } from '@/src/server/services/token';
 import { DELETE, GET, POST } from '@/src/app/api/auth/token/route';
 import { requireSession } from '@/src/lib/auth/withAuth';
@@ -101,7 +101,7 @@ describe('POST Auth token route /api/auth/token', () => {
         vi.mocked(requireSession).mockResolvedValue({ userId: 'user-1', role: 'admin' });
         vi.mocked(tokenService.generateToken).mockResolvedValue(newToken);
         // Act
-        const request = new Request('http://localhost/api/auth/token', {
+        const request = new NextRequest('http://localhost/api/auth/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -144,7 +144,7 @@ describe('POST Auth token route /api/auth/token', () => {
         vi.mocked(requireSession).mockResolvedValue({ userId: 'user-1', role: 'admin' });
         vi.mocked(tokenService.generateToken).mockResolvedValue(newToken);
         // Act
-        const request = new Request('http://localhost/api/auth/token', {
+        const request = new NextRequest('http://localhost/api/auth/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -186,7 +186,7 @@ describe('POST Auth token route /api/auth/token', () => {
         vi.mocked(requireSession).mockResolvedValue({ userId: 'user-1', role: 'admin' });
         vi.mocked(tokenService.generateToken).mockRejectedValue(new Error('Server error'));
         // Act
-        const response = await POST(new Request('http://localhost/api/auth/token') as NextRequest);
+        const response = await POST(new NextRequest('http://localhost/api/auth/token') as NextRequest);
         // Assert
         expect(requireSession).toHaveBeenCalled();
         expect(response.status).toBe(500);

@@ -7,6 +7,7 @@ import { requireSession } from '@/src/lib/auth/withAuth';
 import { GET as listUsersGET, POST as createUserPOST } from '@/src/app/api/auth/users/route';
 import { GET as userByIdGET, PATCH as userByIdPATCH, DELETE as userByIdDELETE } from '@/src/app/api/auth/users/[id]/route';
 import { User } from '@/src/types/type';
+import { NextRequest } from 'next/dist/server/web/spec-extension/request';
 
 vi.mock('@/src/lib/auth/withAuth', () => ({
     requireSession: vi.fn(),
@@ -94,7 +95,8 @@ describe('auth users route integration', () => {
 
         vi.mocked(requireSession).mockResolvedValue({ userId: user.user!.id, role: 'user' });
 
-        const getOwnResponse = await userByIdGET({ params: Promise.resolve({ id: user.user!.id }) });
+        const request = new NextRequest(`http://localhost/api/auth/users/${user.user!.id}`, { method: 'GET' });
+        const getOwnResponse = await userByIdGET(request, { params: Promise.resolve({ id: user.user!.id }) });
         expect(getOwnResponse.status).toBe(200);
 
         vi.mocked(requireSession).mockResolvedValue({ userId: user.user!.id, role: 'admin' });
@@ -131,7 +133,8 @@ describe('auth users route integration', () => {
 
         vi.mocked(requireSession).mockResolvedValue({ userId: admin.user!.id, role: 'admin' });
 
-        const deleteResponse = await userByIdDELETE({ params: Promise.resolve({ id: target.user!.id }) });
+        const request = new NextRequest(`http://localhost/api/auth/users/${target.user!.id}`, { method: 'DELETE' });
+        const deleteResponse = await userByIdDELETE(request, { params: Promise.resolve({ id: target.user!.id }) });
         expect(deleteResponse.status).toBe(200);
 
         const deleted = await authRepository.findUserById(target.user!.id);

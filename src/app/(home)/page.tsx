@@ -6,7 +6,6 @@ import AboutUsDetail from "./components/AboutUsDetail";
 import DevicePreview from "./components/DevicePreview";
 import PopularCollection from "../../components/card/PopularCollection";
 import ArtworkCTA from "./components/ArtworkCTA";
-import Newsletter from "./components/Newsletter";
 import Footer from "../../components/Footer";
 import BackgroundLayout from "../../components/BackgroundLayout";
 import CustomCursor from "../../components/CustomCursor";

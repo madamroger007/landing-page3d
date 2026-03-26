@@ -1,6 +1,7 @@
 import { DELETE } from '@/src/app/api/auth/token/[id]/route';
 import { requireSession } from '@/src/lib/auth/withAuth';
 import { tokenService } from '@/src/server/services/token';
+import { NextRequest } from 'next/server';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/src/lib/auth/withAuth', () => ({
@@ -22,7 +23,8 @@ describe('DELETE /api/auth/token/[id]', () => {
         vi.mocked(tokenService.revokeToken).mockResolvedValue(true);
         const paramsPromise = Promise.resolve({ id: tokenId });
         // Act
-        const response = await DELETE({ params: paramsPromise });
+        const request = new NextRequest(`http://localhost/api/auth/token/${tokenId}`, { method: 'DELETE' });
+        const response = await DELETE(request, { params: paramsPromise });
         // Assert
         expect(response.status).toBe(200);
         expect(requireSession).toHaveBeenCalled();
@@ -36,7 +38,8 @@ describe('DELETE /api/auth/token/[id]', () => {
         vi.mocked(tokenService.revokeToken).mockResolvedValue(false);
         const paramsPromise = Promise.resolve({ id: tokenId });
         // Act
-        const response = await DELETE({ params: paramsPromise });
+        const request = new NextRequest(`http://localhost/api/auth/token/${tokenId}`, { method: 'DELETE' });
+        const response = await DELETE(request, { params: paramsPromise });
         // Assert
         expect(response.status).toBe(404);
         expect(requireSession).toHaveBeenCalled();
@@ -50,7 +53,8 @@ describe('DELETE /api/auth/token/[id]', () => {
         vi.mocked(tokenService.revokeToken).mockRejectedValue(new Error('Database error'));
         const paramsPromise = Promise.resolve({ id: tokenId });
         // Act
-        const response = await DELETE({ params: paramsPromise });
+        const request = new NextRequest(`http://localhost/api/auth/token/${tokenId}`, { method: 'DELETE' });
+        const response = await DELETE(request, { params: paramsPromise });
         // Assert
         expect(response.status).toBe(500);
         expect(requireSession).toHaveBeenCalled();

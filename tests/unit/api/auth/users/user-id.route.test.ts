@@ -36,7 +36,8 @@ describe(' User /api/auth/users/[id]', () => {
             vi.mocked(requireSession).mockResolvedValue({ userId: 'user-1', role: 'admin' });
             vi.mocked(authRepository.findUserById).mockResolvedValue(makeUser());
             // Act
-            const response = await GET({ params: Promise.resolve({ id: 'user-1' }) });
+            const request = new NextRequest('http://localhost/api/auth/users/user-1', { method: 'GET' });
+            const response = await GET(request, { params: Promise.resolve({ id: 'user-1' }) });
             // Assert
             expect(requireSession).toHaveBeenCalled();
             expect(authRepository.findUserById).toHaveBeenCalledWith('user-1');
@@ -48,7 +49,8 @@ describe(' User /api/auth/users/[id]', () => {
             // Arrange
             vi.mocked(requireSession).mockResolvedValue(NextResponse.json({ success: false }, { status: 401 }));
             // Act
-            const response = await GET({ params: Promise.resolve({ id: 'user-1' }) });
+            const request = new NextRequest('http://localhost/api/auth/users/user-1', { method: 'GET' });
+            const response = await GET(request, { params: Promise.resolve({ id: 'user-1' }) });
             // Assert
             expect(requireSession).toHaveBeenCalled();
             expect(response.status).toBe(401);
@@ -60,7 +62,8 @@ describe(' User /api/auth/users/[id]', () => {
             vi.mocked(requireSession).mockResolvedValue({ userId: 'user-1', role: 'admin' });
             vi.mocked(authRepository.findUserById).mockResolvedValue(undefined);
             // Act
-            const response = await GET({ params: Promise.resolve({ id: 'nonexistent-user' }) });
+            const request = new NextRequest('http://localhost/api/auth/users/nonexistent-user', { method: 'GET' });
+            const response = await GET(request, { params: Promise.resolve({ id: 'nonexistent-user' }) });
             // Assert
             expect(requireSession).toHaveBeenCalled();
             expect(authRepository.findUserById).toHaveBeenCalledWith('nonexistent-user');
@@ -71,7 +74,8 @@ describe(' User /api/auth/users/[id]', () => {
             // Arrange
             vi.mocked(requireSession).mockResolvedValue({ userId: 'user-1', role: 'user' });
             // Act
-            const response = await GET({ params: Promise.resolve({ id: 'user-2' }) });
+            const request = new NextRequest('http://localhost/api/auth/users/user-2', { method: 'GET' });
+            const response = await GET(request, { params: Promise.resolve({ id: 'user-2' }) });
             // Assert
             expect(requireSession).toHaveBeenCalled();
             expect(response.status).toBe(403);
@@ -83,7 +87,8 @@ describe(' User /api/auth/users/[id]', () => {
             vi.mocked(requireSession).mockResolvedValue({ userId: 'user-1', role: 'admin' });
             vi.mocked(authRepository.findUserById).mockRejectedValue(new Error('Database error'));
             // Act
-            const response = await GET({ params: Promise.resolve({ id: 'user-1' }) });
+            const request = new NextRequest('http://localhost/api/auth/users/user-1', { method: 'GET' });
+            const response = await GET(request, { params: Promise.resolve({ id: 'user-1' }) });
             // Assert
             expect(requireSession).toHaveBeenCalled();
             expect(authRepository.findUserById).toHaveBeenCalled();
@@ -185,7 +190,8 @@ describe(' User /api/auth/users/[id]', () => {
             vi.mocked(authRepository.findUserById).mockResolvedValue(makeUser());
             vi.mocked(authRepository.deleteUser).mockResolvedValue();
             // Act
-            const response = await DELETE({ params: Promise.resolve({ id: 'user-2' }) });
+            const request = new NextRequest('http://localhost/api/auth/users/user-2', { method: 'DELETE' });
+            const response = await DELETE(request, { params: Promise.resolve({ id: 'user-2' }) });
             // Assert
             expect(requireSession).toHaveBeenCalled();
             expect(authRepository.findUserById).toHaveBeenCalledWith('user-2');
@@ -198,7 +204,8 @@ describe(' User /api/auth/users/[id]', () => {
             // Arrange
             vi.mocked(requireSession).mockResolvedValue(NextResponse.json({ success: false }, { status: 401 }));
             // Act
-            const response = await DELETE({ params: Promise.resolve({ id: 'user-1' }) });
+            const request = new NextRequest('http://localhost/api/auth/users/user-1', { method: 'DELETE' });
+            const response = await DELETE(request, { params: Promise.resolve({ id: 'user-1' }) });
             // Assert
             expect(requireSession).toHaveBeenCalled();
             expect(response.status).toBe(401);
@@ -210,7 +217,8 @@ describe(' User /api/auth/users/[id]', () => {
             vi.mocked(requireSession).mockResolvedValue({ userId: 'user-1', role: 'admin' });
             vi.mocked(authRepository.findUserById).mockResolvedValue(undefined);
             // Act
-            const response = await DELETE({ params: Promise.resolve({ id: 'nonexistent-user' }) });
+            const request = new NextRequest('http://localhost/api/auth/users/nonexistent-user', { method: 'DELETE' });
+            const response = await DELETE(request, { params: Promise.resolve({ id: 'nonexistent-user' }) });
             // Assert
             expect(requireSession).toHaveBeenCalled();
             expect(authRepository.findUserById).toHaveBeenCalledWith('nonexistent-user');
@@ -222,7 +230,8 @@ describe(' User /api/auth/users/[id]', () => {
             // Arrange
             vi.mocked(requireSession).mockResolvedValue({ userId: 'user-1', role: 'admin' });
             // Act
-            const response = await DELETE({ params: Promise.resolve({ id: 'user-1' }) });
+            const request = new NextRequest('http://localhost/api/auth/users/user-1', { method: 'DELETE' });
+            const response = await DELETE(request, { params: Promise.resolve({ id: 'user-1' }) });
             // Assert
             expect(requireSession).toHaveBeenCalled();
             expect(response.status).toBe(400);
@@ -234,7 +243,8 @@ describe(' User /api/auth/users/[id]', () => {
             vi.mocked(requireSession).mockResolvedValue({ userId: 'user-1', role: 'admin' });
             vi.mocked(authRepository.findUserById).mockRejectedValue(new Error('Database error'));
             // Act
-            const response = await DELETE({ params: Promise.resolve({ id: 'user-2' }) });
+            const request = new NextRequest('http://localhost/api/auth/users/user-2', { method: 'DELETE' });
+            const response = await DELETE(request, { params: Promise.resolve({ id: 'user-2' }) });
             // Assert
             expect(requireSession).toHaveBeenCalled();
             expect(authRepository.findUserById).toHaveBeenCalled();
